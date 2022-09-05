@@ -1,3 +1,4 @@
+const { moduleExpression } = require('@babel/types');
 const puppeteer = require('puppeteer');
 const credentials = require('./creds')
 
@@ -440,3 +441,5 @@ async function main()
 }
 
 main();
+
+module.exports = parseFrame;
