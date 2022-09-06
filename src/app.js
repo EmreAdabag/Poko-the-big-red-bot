@@ -1,8 +1,7 @@
 const { moduleExpression } = require('@babel/types');
 const puppeteer = require('puppeteer');
 const credentials = require('./creds')
-
-
+const {Game, parseFrame} = require('../src/poko.js');
 
 
 
@@ -70,7 +69,8 @@ async function main()
     await page.click('button#login-submit');
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    await page.goto('https://www.bovada.lv/poker/poker-lobby/home', { waitUntil: 'networkidle0' });
+    await page.goto('https://www.bovada.lv/poker/poker-lobby/home');
+    await page.waitForNavigation({waitUntil: 'networkidle0',});
     
     //                       join table
 

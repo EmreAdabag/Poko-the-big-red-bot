@@ -178,13 +178,13 @@ function parseFrame(curGame, frameType, frameData) {
         case "CO_BLIND_INFO":
             // add timeline event
             curGame.writeTurn( 
-                curGame.players[ frameData["seat"] - 1 ],
-                actions[ frameData["btn"] ],
-                frameData["bet"] + frameData["baseStakes"]     // check basestakes on tournament play
+                curGame.players[ frameData.seat - 1 ],
+                actions[ frameData.btn ],
+                frameData.bet + frameData.baseStakes     // check basestakes on tournament play
             );
             
             // update player stack
-            curGame.players[ frameData["seat"] - 1 ].stack = frameData["account"];
+            curGame.players[ frameData.seat - 1 ].stack = frameData.account;
             break;
 
         // contains: current game state
