@@ -55,7 +55,7 @@ class Player {
         
         this.stats = {
             hands: 0,
-            bigBlindsWon : 0,
+            amtWon : 0,
             pre: {
                 folds: 0,
                 vpip: 0,
@@ -319,8 +319,15 @@ function parseFrame(curGame, frameType, frameData) {
             break;
         
         case "CO_POT_INFO":
-            frameData[ "returnHi" ].forEach(( element, index ) => {
+            frameData.returnHi.forEach(( element, index ) => {
                 if ( element != 0 ){
+                    curGame.writeTurn(
+                        curGame.players[ index ],
+                        "W",
+                        element
+                    );
+                }
+                if ( frameData.returnLo[ index ] != 0 ){
                     curGame.writeTurn(
                         curGame.players[ index ],
                         "W",
