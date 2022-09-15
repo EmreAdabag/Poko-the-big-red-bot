@@ -224,6 +224,8 @@ function parseFrame(curGame, frameType, frameData) {
 
                 }
             })
+
+            emitter.emit( 'TABLE_UPDATE' );
             break;
         
 
@@ -407,13 +409,15 @@ function parseFrame(curGame, frameType, frameData) {
         case "PLAY_CLEAR_INFO":
             curGame.hand.resetHand(  );
             emitter.emit('END_HAND');
+            emitter.emit( 'TABLE_UPDATE' );
+
             break;
 
         case "PLAY_SEAT_INFO":
             if ( frameData.type == 1 ){
                 if ( frameData.state == 16 ){
                     curGame.players[ frameData.seat - 1 ] = new Player( frameData.account );
-                    emitter.emit( 'TABLE_UPDATE', frameData.seat - 1, true );
+                    emitter.emit( 'TABLE_UPDATE' );
                     console.log(`new player joining from seat: ${frameData.seat}`);    
                 }
                 else if ( frameData.state == 32 ){
@@ -424,7 +428,7 @@ function parseFrame(curGame, frameType, frameData) {
             else if ( frameData.type == 0){
                 if ( frameData.state == 16 ){
                     curGame.players[ frameData.seat - 1 ] = null;
-                    emitter.emit( 'TABLE_UPDATE', frameData.seat - 1, false );
+                    emitter.emit( 'TABLE_UPDATE' );
                     console.log(`old player leaving from seat: ${frameData.seat}`);
                 }
                 else if ( frameData.state == 32 ){

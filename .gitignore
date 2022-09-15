@@ -1,3 +1,5 @@
 creds.js
 node_modules
 src/cert
+.DS_Store
+views/ANDY.JPG

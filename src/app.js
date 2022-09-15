@@ -63,28 +63,39 @@ io.on('connection', (socket) => {
         socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
     });
 
-    emitter.on( 'TABLE_UPDATE', ( seat, joined ) => {
-        socket.emit( 'TABLE_UPDATE', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, id : seat + 1, joined : joined }) );
+    emitter.on( 'TABLE_UPDATE', ( ) => {
+        if (curGame.mySeat == null) return;
+        
+        let presentPlayers = [ null, null, null, null, null, null, null, null, null ];
+
+        for ( let i = 0; i < 9; i++ ){
+            if ( curGame.players[ i ] != null )
+                presentPlayers[ ( i - curGame.mySeat + 9 ) % 9 ] = i;
+        }
+    
+        socket.emit( 'TABLE_UPDATE', JSON.stringify( presentPlayers ));
     });
 
 
     // emre remember this when loading in breaks on tournment mode
     // table initialization sent to client when your seat is received
     // tournament mode mySeat != cash game mySeat
-    emitter.on( 'TABLE_INIT', (  ) => {
-        if ( curGame.mySeat == null ){
-            console.log('Trouble initializing the table, close the window and try again');
-        }
+    // emitter.on( 'TABLE_INIT', (  ) => {
+    //     if ( curGame.mySeat == null ){
+    //         console.log('Trouble initializing the table, close the window and try again');
+    //     }
 
-        presentPlayers = [ null, null, null, null, null, null, null, null, null ];
+    //     if (curGame.mySeat == null) return;
 
-        for ( let i = 0; i < 9; i++ ){
-            if ( curGame.players[ ( mySeat + i ) % 9 ] != null )
-                presentPlayers[ i ] = ( mySeat + i ) % 9;
-        }
+    //     presentPlayers = [ null, null, null, null, null, null, null, null, null ];
 
-        socket.emit( 'TABLE_INIT', JSON.stringify( presentPlayers ) );
-    });
+    //     for ( let i = 0; i < 9; i++ ){
+    //         if ( curGame.players[ ( mySeat + i ) % 9 ] != null )
+    //             presentPlayers[ i ] = ( mySeat + i ) % 9;
+    //     }
+
+    //     socket.emit( 'TABLE_INIT', JSON.stringify( presentPlayers ) );
+    // });
 
     emitter.on( 'END_HAND', (  ) => {
         let msg = {};
@@ -106,44 +117,6 @@ io.on('connection', (socket) => {
         socket.emit( 'END_HAND', JSON.stringify( msg ));
     });
 
-
-    // let curStats = [];
-    // let playerCodes = [ 'p1','p2','p3','p4','p5','p6','p7','p8','p9' ];
-    
-    // function updatePage(  ){
-
-    //     if ( curGame == null || curGame.players.every( element => element == null ) ){
-
-    //         socket.emit( 'update', 'inactive');
-
-    //     }
-    //     else{
-
-    //         for ( let i = 0; i < 9; i++ ){
-                
-    //             let plr = curGame.players[ ( curGame.mySeat + i ) % 9 ];
-                
-    //             if ( plr == null ){
-    //                 curStats[ i ] = null;
-    //                 continue;
-    //             }
-                    
-
-    //             curStats[ i ] =
-    //             {
-    //                 no : ( curGame.mySeat + i ) % 9,
-    //                 vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
-    //                 pfr : Math.round( 10000 * plr.stats.pre.pfr / plr.stats.hands ) / 100,
-    //                 agg : '',                         // EMRE implemenet
-    //                 bbwpohh : ''                      // EMRE implemenet
-    //             }
-
-    //         }
-
-    //         socket.emit( 'update', JSON.stringify( curStats ) );
-    //     }
-            
-    // }
 
 });
 

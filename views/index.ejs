@@ -14,10 +14,6 @@
             box-sizing: border-box;
             text-align: center;
         }
-
-        .data{
-
-        }
         .oval {
             height: 70vh;
             width: 60vw;
@@ -87,7 +83,10 @@
     <ellipse cx="75" cy="75" rx="200" ry="50" stroke="red" fill="transparent" stroke-width="5"/>
     <body>
         <div class="oval"></div>
-        <button onclick="enterGame()">Enter game</button>
+        <div>
+            <button onclick=enterGame() style="top: 2%; left: 2%; position: absolute;">click me!</button>
+        </div>
+        
         <div id="s0">
             <h3 class = no></h3>
             <h4 class = vpip></h4>
@@ -166,58 +165,56 @@
             
             socket.on( 'TABLE_UPDATE', ( msg ) => {
 
+                console.log(msg);
                 let data = JSON.parse( msg );
-                let seat = data.seat, id = data.id, joined = data.joined;
 
-                if ( joined ){
-                    document.querySelector( '#s' + seat + ' .no' ).textContent = 'Player ' + id;
+                for (let i = 0; i < 9; i++) {
+                    if (data[i] == null) {
+                        document.querySelector( '#s' + seat ).textContent = '';
+                        continue;
+                    }
+                    // if (document.querySelector( '#s' + i + ' .no' ).textContent != 'Player ' + data[ i ])
+                    document.querySelector( '#s' + i + ' .no' ).textContent = 'Player ' + (data[ i ] + 1);
                 }
-                else {
-                    document.querySelector( '#s' + seat ).textContent = '';
-                }
+
+
+                // let seat = data.seat, id = data.id, joined = data.joined;
+
+                // if ( joined ){
+                //     document.querySelector( '#s' + seat + ' .no' ).textContent = 'Player ' + id;
+                // }
+                // else {
+                //     document.querySelector( '#s' + seat ).textContent = '';
+                // }
             })
 
             socket.on( 'NEW_STAT', ( msg ) => {
 
                 let types = { vpip : 'VPIP: ', pfr : 'PFR: ', agg : 'AGG: ', bbwpohh : 'BBWPOHH :' };
 
-                if ( msg != null && msg != 'inactive' ){
+                console.log(msg);
 
-                    let stats = JSON.parse( msg );
-                    
-                    for ( let [ type, value ] in Object.entries( stats.data ) ){
-
-                        document.querySelector( '#s' + stats.seat + ' .' + type ).textContent =  types[ type ] + value; 
-                    
-                    }                    
-
-                    // for ( let i = 0; i < 9; i++ ){
-
-                    //     if ( stats[i] == null ){
-                    //         document.querySelector( '#s' + i ).textContent = "";
-                    //         continue;
-                    //     }
-
-                    //     document.querySelector( '#s' + i + ' .no' ).textContent =  "player " + stats[i].no; 
-                    //     document.querySelector( '#s' + i + ' .vpip' ).textContent =  stats[i].vpip == null ? "" : stats[i].vpip + "%";
-                    //     document.querySelector( '#s' + i + ' .pfr' ).textContent =  stats[i].pfr == null ? "" : stats[i].pfr + "%";
-                    //     document.querySelector( '#s' + i + ' .agg' ).textContent =  stats[i].agg == null ? "" : stats[i].agg + "%";
-                    //     document.querySelector( '#s' + i + ' .bbwpohh' ).textContent =  stats[i].bbwpohh == null ? "" : stats[i].bbwpohh;
-                    // }
-
-                }
-
-                socket.on( 'END_HAND', ( msg ) => {
-                    let data = JSON.parse( msg );
-
-                    for ( [ player, stats ] in Object.entries(data) ){
-                        document.querySelector( '#' + player + ' .vpip' ).textContent = 'VPIP: ' + stats.vpip;
-                        document.querySelector( '#' + player + ' .pfr' ).textContent = 'PFR: ' + stats.pfr;
-                        document.querySelector( '#' + player + ' .agg' ).textContent = 'pdf: ' + stats.agg;
-                        document.querySelector( '#' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + stats.bbwpohh;
-                    }
-                })
+                let stats = JSON.parse( msg );
                 
+                for ( let [ type, value ] in Object.entries( stats.data ) ){
+
+                    document.querySelector( '#s' + stats.seat + ' .' + type ).textContent =  types[ type ] + value; 
+                    
+                }
+                
+            })
+
+            socket.on( 'END_HAND', ( msg ) => {
+
+                console.log(msg);
+                let data = JSON.parse( msg );
+
+                for ( [ player, stats ] in Object.entries(data) ){
+                    document.querySelector( '#' + player + ' .vpip' ).textContent = 'VPIP: ' + stats.vpip;
+                    document.querySelector( '#' + player + ' .pfr' ).textContent = 'PFR: ' + stats.pfr;
+                    document.querySelector( '#' + player + ' .agg' ).textContent = 'agg: ' + stats.agg;
+                    document.querySelector( '#' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + stats.bbwpohh;
+                }
             })
 
             const enterGame = ( ) => {
