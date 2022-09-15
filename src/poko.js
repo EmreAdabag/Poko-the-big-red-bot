@@ -1,5 +1,5 @@
-
-
+import { inspect } from 'util';
+import { emitter } from './eventEmitter.js';
 
 const actions = { 
     2 : "SB",       // SMALL BLIND
@@ -52,10 +52,21 @@ class Player {
         this.sittingOut = false;
         this.position = -1;
 
+        /*---------------------------
+        *   VPIP (voluntary put-in-pot) = pre.vpip / hands
+        *           -incremented if player voluntarily contributes to pot anytime preflop
+        *           -OR if everyone limps/folds, bb checks and bets/calls/check-calls/check-raises the flop
+        * 
+        *   PFR (pre-flop raise) = pre.raisins / hands
+        *   
+        * ---------------------------*/
+        
         
         this.stats = {
             hands: 0,
             amtWon : 0,
+            vpipRecorded : false,
+            pfrRecorded : false,
             pre: {
                 folds: 0,
                 vpip: 0,
@@ -65,7 +76,8 @@ class Player {
                 calls: 0,
                 bets: 0,
                 raisins: 0,
-                checks: 0
+                checks: 0,
+                folds: 0
             } 
         };
     }
@@ -84,19 +96,22 @@ class Turn {
 
 class Hand {
 
-    constructor ( bigBlind, smlBlind, btn, pot, rake ) {
-        this.bBlind = bigBlind;
-        this.sBlind = smlBlind;
-        this.btn = btn;
-        this.pot = pot;
-        this.rake = rake;
+    constructor (  ) {
+        // this.bBlind = bigBlind;
+        // this.sBlind = smlBlind;
+        // this.btn = btn;
+        // this.pot = pot;
+        // this.rake = rake;
         this.timeline = [];
     }
 
     resetHand(  ){
         console.log(this.timeline);
-
+        this.bbVal = -1;
+        this.sbVal = -1;
         this.btn = -1;
+        this.bb = -1;
+        this.sb = -1;
         this.pot = [];
         this.rake = 0;
         this.timeline = [];
@@ -107,19 +122,15 @@ class Hand {
 
 class Game {
 
-    constructor ( hands, allPlayers, curBB, curSB ) {
+    constructor (  ) {
         console.log("game created");
         this.players = [];
         for (let i = 0; i < 9; i++){
             this.players.push( null );
         }
-        this.hands = hands;
-        this.allPlayers = allPlayers;
-        this.curBB = curBB;
-        this.curSB = curSB;
         this.recording = false;
         this.hand = new Hand(  );
-        this.mySeat = 0;
+        this.mySeat = null;
     }
 
     writeEvent( input ){
@@ -151,8 +162,8 @@ function parseFrame(curGame, frameType, frameData) {
         // only sent when joining table
         // contains: blinds
         case "CO_OPTION_INFO":
-            curGame.curBB = frameData.bblind;
-            curGame.curSB = frameData.sblind;
+            curGame.hand.bbVal = frameData.bblind;
+            curGame.hand.sbVal = frameData.sblind;
             break;
 
         case "CO_TABLE_STATE":
@@ -165,7 +176,7 @@ function parseFrame(curGame, frameType, frameData) {
         // this one acts kinda weird tho
         case "CO_DEALER_SEAT":
             // dealer is 0-indexed
-            curGame.hand.btn = frameData["seat"] - 1;
+            curGame.hand.btn = frameData.seat - 1;
             
             // let i = curGame.hand.btn + 1;
             // while ( curGame.players[ i ] == null || curGame.players[ i ].sittingOut == true ){ i = ( i + 1 ) % 9; }
@@ -173,6 +184,10 @@ function parseFrame(curGame, frameType, frameData) {
             // while ( curGame.players[ i ] == null || curGame.players[ i ].sittingOut == true ){ i = ( i + 1 ) % 9; }
             // curGame.players[ i ].position = 2;
             break;    
+
+        case "PLAY_SEAT_RESERVATION":
+            curGame.mySeat = frameData.seat;
+            break;
 
         // blind turns
         case "CO_BLIND_INFO":
@@ -185,6 +200,16 @@ function parseFrame(curGame, frameType, frameData) {
             
             // update player stack
             curGame.players[ frameData.seat - 1 ].stack = frameData.account;
+
+            if ( frameData.btn === 4 ){
+                curGame.hand.bb = frameData.seat - 1;
+            }
+            else if ( frameData.btn === 2 ){
+                curGame.hand.sb = frameData.seat - 1;
+            }
+            else if ( frameData.btn === 8 ){
+                // posted in, VPIP? EMRE
+            }
             break;
 
         // contains: current game state
@@ -198,7 +223,6 @@ function parseFrame(curGame, frameType, frameData) {
                         curGame.players[index].sittingOut = true;
 
                 }
-
             })
             break;
         
@@ -209,10 +233,12 @@ function parseFrame(curGame, frameType, frameData) {
             Object.entries( frameData ).forEach( entry => {
                 const [ playerSeat, cards ] = entry;
                 if ( seats[ playerSeat ] != undefined ){
-                    curGame.players[ seats[ playerSeat ] ].stats.hands++;
-
+                    let player = curGame.players[ seats[ playerSeat ] ];
+                    player.stats.hands++;
+                    player.stats.vpipRecorded = false;
+                    player.stats.pfrRecorded = false;
                     // EMRE consider ordering cards
-                    curGame.players[ seats[ playerSeat ] ].cards = cards;
+                    player.cards = cards;
                 }
             })
             break;
@@ -220,18 +246,18 @@ function parseFrame(curGame, frameType, frameData) {
 
         // turns
         case "CO_SELECT_INFO":
-
-            // current hand gets new turn appended
-            curGame.writeTurn( 
-                curGame.players[ frameData.seat - 1 ], 
-                actions[ frameData.btn ],
-                frameData.raise != 0 ? frameData.raise : frameData.bet
-                );
-
+            
+            let curPlayer = curGame.players[ frameData.seat - 1 ];
             let curAction = actions[ frameData.btn ];
             let playStat = curGame.players[ frameData.seat - 1 ].stats;
 
-            // console.log(`phase: ${curGame.hand.phase}`);
+            // current hand gets new turn appended
+            curGame.writeTurn( 
+                curPlayer, 
+                curAction,
+                frameData.raise != 0 ? frameData.raise : frameData.bet
+                );
+
             if (curGame.hand.phase == undefined || curGame.hand.phase === "X")
                 break;
         
@@ -239,14 +265,23 @@ function parseFrame(curGame, frameType, frameData) {
                 switch (curAction) {
                     case "F":
                         playStat.pre.folds++;
+                        emitter.emit('pF', [ frameData.seat - 1 ] );
                         break;
                     case "R":
                     case "RR":
-                        playStat.pre.raisins++;
                     case "S":
+                        if ( curPlayer.stats.pfrRecorded === false ){
+                            curPlayer.stats.pfrRecorded = true;
+                            playStat.pre.raisins++;
+                            emitter.emit('pR', [ frameData.seat - 1 ] );
+                        }
                     case "CS":
                     case "C":
-                        playStat.pre.vpip++;
+                        if ( curPlayer.stats.vpipRecorded === false ){
+                            curPlayer.stats.vpipRecorded = true;
+                            playStat.pre.vpip++;
+                            emitter.emit('V', [ frameData.seat - 1 ] );    
+                        }
                         break;
                     default:
                         break;
@@ -257,14 +292,31 @@ function parseFrame(curGame, frameType, frameData) {
                 switch (curAction) {
                     case "F":
                         playStat.post.folds++;
+                        emitter.emit('F', [ frameData.seat - 1 ] );
                         break;
                     case "C":
                     case "CS":
                         playStat.post.calls++;
+                        emitter.emit('C', [ frameData.seat - 1 ] );
+
+                        // catches a big blind that checks a limp preflop
+                        if ( curPlayer.stats.vpipRecorded === false ){
+                            curPlayer.stats.vpipRecorded = true;
+                            playStat.pre.vpip++;
+                            emitter.emit('V', [ frameData.seat - 1 ] );    
+                        }
                         break;    
                     case "R":
                     case "S":
                         playStat.post.raisins++;
+                        emitter.emit('R', [ frameData.seat - 1 ] );
+
+                        // catches a big blind that checks a limp preflop
+                        if ( curPlayer.stats.vpipRecorded === false ){
+                            curPlayer.stats.vpipRecorded = true;
+                            playStat.pre.vpip++;
+                            emitter.emit('V', [ frameData.seat - 1 ] );    
+                        }
                         break;    
                     
                     default:
@@ -272,7 +324,7 @@ function parseFrame(curGame, frameType, frameData) {
                 }
             }
 
-            console.log( `player: ${ frameData.seat } stats: ${ playStat }` );
+            console.log( `player: ${ frameData.seat } stats: ${ inspect(playStat, false, null, true /* enable colors */) }` );
 
             // update stack
             curGame.players[ frameData.seat - 1 ].stack = frameData.account;
@@ -326,13 +378,20 @@ function parseFrame(curGame, frameType, frameData) {
                         "W",
                         element
                     );
+                    curGame.players[ index ].stats.amtWon += element;
+                    emitter.emit('win', [ index, 'W'] );
                 }
-                if ( frameData.returnLo[ index ] != 0 ){
+            })
+            
+            frameData.returnLo.forEach(( element, index ) => {
+                if ( element != 0 ){
                     curGame.writeTurn(
                         curGame.players[ index ],
                         "W",
                         element
                     );
+                    curGame.players[ index ].stats.amtWon += element;
+                    emitter.emit('win', [ index ] );
                 }
             })
             break;
@@ -347,12 +406,14 @@ function parseFrame(curGame, frameType, frameData) {
         // EMRE modify this for tournament play
         case "PLAY_CLEAR_INFO":
             curGame.hand.resetHand(  );
+            emitter.emit('END_HAND');
             break;
 
         case "PLAY_SEAT_INFO":
             if ( frameData.type == 1 ){
                 if ( frameData.state == 16 ){
                     curGame.players[ frameData.seat - 1 ] = new Player( frameData.account );
+                    emitter.emit( 'TABLE_UPDATE', frameData.seat - 1, true );
                     console.log(`new player joining from seat: ${frameData.seat}`);    
                 }
                 else if ( frameData.state == 32 ){
@@ -363,6 +424,7 @@ function parseFrame(curGame, frameType, frameData) {
             else if ( frameData.type == 0){
                 if ( frameData.state == 16 ){
                     curGame.players[ frameData.seat - 1 ] = null;
+                    emitter.emit( 'TABLE_UPDATE', frameData.seat - 1, false );
                     console.log(`old player leaving from seat: ${frameData.seat}`);
                 }
                 else if ( frameData.state == 32 ){
@@ -375,4 +437,4 @@ function parseFrame(curGame, frameType, frameData) {
 }
 
 
-module.exports = {Game, parseFrame};
+export { Game, parseFrame };

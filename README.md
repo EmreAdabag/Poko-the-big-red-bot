@@ -14,6 +14,8 @@ ToDo:
 
 - how are changing blinds sent?
 - side pots
+-amtwon includes buy in
+-how does vpip work if multiple turns preflop?
 
 low prio:
 

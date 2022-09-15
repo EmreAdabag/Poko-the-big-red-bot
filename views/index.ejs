@@ -1,0 +1,229 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+
+        <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .data{
+
+        }
+        .oval {
+            height: 70vh;
+            width: 60vw;
+            border-radius: 80%;
+            border: 5px solid #800020;
+            position:absolute;
+            left:50%;
+            top:50%;
+            transform:translate(-50%,-50%);
+        }
+        #s0{
+            top: 90vh;
+            left: 50vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s1{
+            top: 80vh;
+            left: 23vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s2{
+            top: 58vh;
+            left: 16vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s3{
+            top: 24vh;
+            left: 17vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s4{
+            top: 8vh;
+            left: 37vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s5{
+            top: 8vh;
+            left: 59vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s6{
+            top: 24vh;
+            left: 83vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s7{
+            top: 58vh;
+            left: 84vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        #s8{
+            top: 80vh;
+            left: 73vw;
+            position:absolute;
+            transform:translate(-50%,-50%);
+        }
+        </style>
+    </head>
+    <ellipse cx="75" cy="75" rx="200" ry="50" stroke="red" fill="transparent" stroke-width="5"/>
+    <body>
+        <div class="oval"></div>
+        <button onclick="enterGame()">Enter game</button>
+        <div id="s0">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s1">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s2">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s3">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s4">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s5">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s6">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s7">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        <div id="s8">
+            <h3 class = no></h3>
+            <h4 class = vpip></h4>
+            <h4 class = pfr></h4>
+            <h4 class = agg></h4>
+            <h4 class = bbwpohh></h4>
+        </div>
+        
+        <script>
+            const socket = io('http://localhost:3000');
+
+            socket.on( 'TABLE_INIT', ( msg ) => {
+                let players = JSON.parse( msg );
+
+                for ( let i = 0; i < 9; i++ ){
+                    if ( players[ i ] != null )
+                        document.querySelector( '#s' + i + ' .no' ).textContent = 'Player ' + players[ i ];    
+                }
+            });
+            
+            socket.on( 'TABLE_UPDATE', ( msg ) => {
+
+                let data = JSON.parse( msg );
+                let seat = data.seat, id = data.id, joined = data.joined;
+
+                if ( joined ){
+                    document.querySelector( '#s' + seat + ' .no' ).textContent = 'Player ' + id;
+                }
+                else {
+                    document.querySelector( '#s' + seat ).textContent = '';
+                }
+            })
+
+            socket.on( 'NEW_STAT', ( msg ) => {
+
+                let types = { vpip : 'VPIP: ', pfr : 'PFR: ', agg : 'AGG: ', bbwpohh : 'BBWPOHH :' };
+
+                if ( msg != null && msg != 'inactive' ){
+
+                    let stats = JSON.parse( msg );
+                    
+                    for ( let [ type, value ] in Object.entries( stats.data ) ){
+
+                        document.querySelector( '#s' + stats.seat + ' .' + type ).textContent =  types[ type ] + value; 
+                    
+                    }                    
+
+                    // for ( let i = 0; i < 9; i++ ){
+
+                    //     if ( stats[i] == null ){
+                    //         document.querySelector( '#s' + i ).textContent = "";
+                    //         continue;
+                    //     }
+
+                    //     document.querySelector( '#s' + i + ' .no' ).textContent =  "player " + stats[i].no; 
+                    //     document.querySelector( '#s' + i + ' .vpip' ).textContent =  stats[i].vpip == null ? "" : stats[i].vpip + "%";
+                    //     document.querySelector( '#s' + i + ' .pfr' ).textContent =  stats[i].pfr == null ? "" : stats[i].pfr + "%";
+                    //     document.querySelector( '#s' + i + ' .agg' ).textContent =  stats[i].agg == null ? "" : stats[i].agg + "%";
+                    //     document.querySelector( '#s' + i + ' .bbwpohh' ).textContent =  stats[i].bbwpohh == null ? "" : stats[i].bbwpohh;
+                    // }
+
+                }
+
+                socket.on( 'END_HAND', ( msg ) => {
+                    let data = JSON.parse( msg );
+
+                    for ( [ player, stats ] in Object.entries(data) ){
+                        document.querySelector( '#' + player + ' .vpip' ).textContent = 'VPIP: ' + stats.vpip;
+                        document.querySelector( '#' + player + ' .pfr' ).textContent = 'PFR: ' + stats.pfr;
+                        document.querySelector( '#' + player + ' .agg' ).textContent = 'pdf: ' + stats.agg;
+                        document.querySelector( '#' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + stats.bbwpohh;
+                    }
+                })
+                
+            })
+
+            const enterGame = ( ) => {
+                socket.emit("initialize");
+            }
+
+        </script>
+    </body>
+    </html>

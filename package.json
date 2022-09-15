@@ -1,13 +1,18 @@
 {
   "name": "POKO",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "nodemon ./src/app.js"
   },
   "devDependencies": {
     "jest": "^29.0.2"
   },
   "dependencies": {
-  "puppeteer": "^17.1.1"
+    "ejs": "^3.1.8",
+    "express": "^4.18.1",
+    "puppeteer": "^17.1.1",
+    "socket.io": "^4.5.2"
   }
 }
