@@ -408,7 +408,6 @@ function parseFrame(curGame, frameType, frameData) {
         // EMRE modify this for tournament play
         case "PLAY_CLEAR_INFO":
             curGame.hand.resetHand(  );
-            emitter.emit('END_HAND');
             emitter.emit( 'TABLE_UPDATE' );
 
             break;

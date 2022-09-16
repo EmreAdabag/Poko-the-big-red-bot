@@ -28,41 +28,6 @@ io.on('connection', (socket) => {
         initGame( );
     })
 
-    // fill these in
-    emitter.on( 'pF', ( plr ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
-    });
-
-
-    emitter.on( 'pR', ( seat ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
-    });
-
-
-    emitter.on( 'V', ( seat ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : { vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100 } }) )
-    });
-
-
-    emitter.on( 'F', ( seat ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
-    });
-
-
-    emitter.on( 'C', ( seat ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
-    });
-
-
-    emitter.on( 'R', ( seat ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
-    });
-
-
-    emitter.on( 'W', ( seat ) => {
-        socket.emit( 'NEW_STAT', JSON.stringify({ seat : ( seat - curGame.mySeat + 9 ) % 9, data : {  } }) )
-    });
-
     emitter.on( 'TABLE_UPDATE', ( ) => {
         if (curGame.mySeat == null) return;
         
@@ -70,7 +35,13 @@ io.on('connection', (socket) => {
 
         for ( let i = 0; i < 9; i++ ){
             if ( curGame.players[ i ] != null )
-                presentPlayers[ ( i - curGame.mySeat + 9 ) % 9 ] = i;
+                presentPlayers[ ( i - curGame.mySeat + 9 ) % 9 ] = {
+                    seat: i,
+                    vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
+                    pfr : Math.round( 10000 * plr.stats.pre.pfr / plr.stats.hands ) / 100,
+                    agg : 1,        // implement this EMRE
+                    bbwpohh : 1     // implement this EMRE
+                };
         }
     
         socket.emit( 'TABLE_UPDATE', JSON.stringify( presentPlayers ));
@@ -96,27 +67,6 @@ io.on('connection', (socket) => {
 
     //     socket.emit( 'TABLE_INIT', JSON.stringify( presentPlayers ) );
     // });
-
-    emitter.on( 'END_HAND', (  ) => {
-        let msg = {};
-
-        for ( const [ index, player ] in curGame.players ){
-            
-            if ( player == null ){
-                continue;
-            }
-            
-            msg[ 's' + ( index - curGame.mySeat + 9 ) % 9 ] = {
-                vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
-                pfr : Math.round( 10000 * plr.stats.pre.pfr / plr.stats.hands ) / 100,
-                agg : 1,        // implement this EMRE
-                bbwpohh : 1     // implement this EMRE
-            }
-        }
-
-        socket.emit( 'END_HAND', JSON.stringify( msg ));
-    });
-
 
 });
 
