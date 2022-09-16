@@ -159,14 +159,19 @@
                 console.log(msg);
                 let data = JSON.parse( msg );
 
-                for ( [ player, stats ] in Object.entries(data) ) {
+                data.forEach( (stats, player) => {
+                    if ( stats == null ) {
+                        document.querySelector( '#s' + player ).textContent = '';
+                        return;    
+                    };
                     document.querySelector( '#s' + player + ' .no' ).textContent = 'Player ' + (stats.seat + 1);
-                    document.querySelector( '#' + player + ' .vpip' ).textContent = 'VPIP: ' + stats.vpip;
-                    document.querySelector( '#' + player + ' .pfr' ).textContent = 'PFR: ' + stats.pfr;
-                    document.querySelector( '#' + player + ' .agg' ).textContent = 'agg: ' + stats.agg;
-                    document.querySelector( '#' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + stats.bbwpohh;
-                }
+                    document.querySelector( '#s' + player + ' .vpip' ).textContent = 'VPIP: ' + stats.vpip;
+                    document.querySelector( '#s' + player + ' .pfr' ).textContent = 'PFR: ' + stats.pfr;
+                    document.querySelector( '#s' + player + ' .agg' ).textContent = 'agg: ' + stats.agg;
+                    document.querySelector( '#s' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + stats.bbwpohh;
+                })
             });
+
             const enterGame = ( ) => {
                 socket.emit("initialize");
             }

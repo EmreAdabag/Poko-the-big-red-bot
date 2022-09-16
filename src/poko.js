@@ -106,7 +106,7 @@ class Hand {
     }
 
     resetHand(  ){
-        console.log(this.timeline);
+        // console.log(this.timeline);
         this.bbVal = -1;
         this.sbVal = -1;
         this.btn = -1;
@@ -186,7 +186,7 @@ function parseFrame(curGame, frameType, frameData) {
             break;    
 
         case "PLAY_SEAT_RESERVATION":
-            curGame.mySeat = frameData.seat;
+            curGame.mySeat = frameData.seat - 1;
             break;
 
         // blind turns
@@ -206,9 +206,6 @@ function parseFrame(curGame, frameType, frameData) {
             }
             else if ( frameData.btn === 2 ){
                 curGame.hand.sb = frameData.seat - 1;
-            }
-            else if ( frameData.btn === 8 ){
-                // posted in, VPIP? EMRE
             }
             break;
 
@@ -267,22 +264,19 @@ function parseFrame(curGame, frameType, frameData) {
                 switch (curAction) {
                     case "F":
                         playStat.pre.folds++;
-                        emitter.emit('pF', [ frameData.seat - 1 ] );
                         break;
                     case "R":
                     case "RR":
                     case "S":
-                        if ( curPlayer.stats.pfrRecorded === false ){
+                        if ( curGame.recording && curPlayer.stats.pfrRecorded === false ){
                             curPlayer.stats.pfrRecorded = true;
                             playStat.pre.raisins++;
-                            emitter.emit('pR', [ frameData.seat - 1 ] );
                         }
                     case "CS":
                     case "C":
-                        if ( curPlayer.stats.vpipRecorded === false ){
+                        if ( curGame.recording && curPlayer.stats.vpipRecorded === false ){
                             curPlayer.stats.vpipRecorded = true;
                             playStat.pre.vpip++;
-                            emitter.emit('V', [ frameData.seat - 1 ] );    
                         }
                         break;
                     default:
@@ -294,30 +288,25 @@ function parseFrame(curGame, frameType, frameData) {
                 switch (curAction) {
                     case "F":
                         playStat.post.folds++;
-                        emitter.emit('F', [ frameData.seat - 1 ] );
                         break;
                     case "C":
                     case "CS":
                         playStat.post.calls++;
-                        emitter.emit('C', [ frameData.seat - 1 ] );
 
                         // catches a big blind that checks a limp preflop
-                        if ( curPlayer.stats.vpipRecorded === false ){
+                        if ( curGame.recording && curPlayer.stats.vpipRecorded === false ){
                             curPlayer.stats.vpipRecorded = true;
                             playStat.pre.vpip++;
-                            emitter.emit('V', [ frameData.seat - 1 ] );    
                         }
                         break;    
                     case "R":
                     case "S":
                         playStat.post.raisins++;
-                        emitter.emit('R', [ frameData.seat - 1 ] );
 
                         // catches a big blind that checks a limp preflop
-                        if ( curPlayer.stats.vpipRecorded === false ){
+                        if ( curGame.recording && curPlayer.stats.vpipRecorded === false ){
                             curPlayer.stats.vpipRecorded = true;
                             playStat.pre.vpip++;
-                            emitter.emit('V', [ frameData.seat - 1 ] );    
                         }
                         break;    
                     
@@ -326,7 +315,7 @@ function parseFrame(curGame, frameType, frameData) {
                 }
             }
 
-            console.log( `player: ${ frameData.seat } stats: ${ inspect(playStat, false, null, true /* enable colors */) }` );
+            // console.log( `player: ${ frameData.seat } stats: ${ inspect(playStat, false, null, true /* enable colors */) }` );
 
             // update stack
             curGame.players[ frameData.seat - 1 ].stack = frameData.account;
@@ -355,7 +344,7 @@ function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_CURRENT_PLAYER":
-            if ( frameData["seat"] == curGame.mySeat ){
+            if ( frameData["seat"] == curGame.mySeat + 1 ){
                 // signify our hand
             }
             break;    
@@ -407,6 +396,7 @@ function parseFrame(curGame, frameType, frameData) {
 
         // EMRE modify this for tournament play
         case "PLAY_CLEAR_INFO":
+            console.log("clearing hand");
             curGame.hand.resetHand(  );
             emitter.emit( 'TABLE_UPDATE' );
 
