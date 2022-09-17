@@ -1,4 +1,5 @@
 import { inspect } from 'util';
+import { runInThisContext } from 'vm';
 import { emitter } from './eventEmitter.js';
 
 const actions = { 
@@ -23,13 +24,6 @@ const phases = {
     64 : "R"        // RIVER
 }
 
-// const positions = {
-//     0 : "D",        // DEALER
-//     1 : "S",        // SMALL BLIND
-//     2 : "B"         // BIG BLIND
-// }
-
-
 
 const seats = { "seat1" : 0, 
                 "seat2" : 1, 
@@ -45,12 +39,12 @@ const seats = { "seat1" : 0,
 
 class Player {
 
-    constructor ( stack = 0, id = null, cards = [0x8080, 0x8080] ){
+    constructor ( stack = 0, id = null ){
         this.stack = stack;
         this.id = id;
-        this.cards = cards;
         this.sittingOut = false;
         this.position = -1;
+        this.bought = stack;
 
         /*---------------------------
         *   VPIP (voluntary put-in-pot) = pre.vpip / hands
@@ -107,8 +101,7 @@ class Hand {
 
     resetHand(  ){
         // console.log(this.timeline);
-        this.bbVal = -1;
-        this.sbVal = -1;
+        // might want to update bbVal, sbVal
         this.btn = -1;
         this.bb = -1;
         this.sb = -1;
@@ -172,21 +165,14 @@ function parseFrame(curGame, frameType, frameData) {
                 curGame.recording = true;    
             break;
 
-        // contains: which seat is dealer
-        // this one acts kinda weird tho
         case "CO_DEALER_SEAT":
-            // dealer is 0-indexed
             curGame.hand.btn = frameData.seat - 1;
-            
-            // let i = curGame.hand.btn + 1;
-            // while ( curGame.players[ i ] == null || curGame.players[ i ].sittingOut == true ){ i = ( i + 1 ) % 9; }
-            // curGame.players[ i ].position = 1;
-            // while ( curGame.players[ i ] == null || curGame.players[ i ].sittingOut == true ){ i = ( i + 1 ) % 9; }
-            // curGame.players[ i ].position = 2;
             break;    
 
         case "PLAY_SEAT_RESERVATION":
-            curGame.mySeat = frameData.seat - 1;
+            if ( curGame.mySeat == null ){
+                curGame.mySeat = frameData.seat - 1;   
+            }
             break;
 
         // blind turns

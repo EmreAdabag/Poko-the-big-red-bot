@@ -12,15 +12,17 @@ module.exports = [ email, pass ];
 
 ToDo:
 
+tournament
+
+cash
+--------------------------------------------------
 - how are changing blinds sent?
 - side pots
--amtwon includes buy in
--how does vpip work if multiple turns preflop?
+-how do rebuys work ( PLAY_BUYIN_INFO?)
+-multiple table functionality
 
 low prio:
-
-- know when you're involved in the hand (what seat are we)
-- for tournament, fix your shit, finding your own seat is different. Might wnat a flag for tournament vs cash
+- for tournament, fix finding your own seat is different. Might wnat a flag for tournament vs cash
 
 
 
