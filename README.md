@@ -13,23 +13,19 @@ module.exports = [ email, pass ];
 ToDo:
 
 tournament
+changing tables
 
 cash
 --------------------------------------------------
-- how are changing blinds sent?
 - side pots
 -how do rebuys work ( PLAY_BUYIN_INFO?)
 -multiple table functionality
 
 low prio:
-- for tournament, fix finding your own seat is different. Might wnat a flag for tournament vs cash
 
 
 
-
-CO_TABLE_INFO               contains game info when joining a table
-PLAY_SEAT_INFO              contains your seat no
-
+CO_SELECT_REQ               indicates your turn
 
 
 

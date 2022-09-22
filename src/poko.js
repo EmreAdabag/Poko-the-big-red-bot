@@ -1,5 +1,5 @@
-import { inspect } from 'util';
-import { runInThisContext } from 'vm';
+// import { inspect } from 'util';
+// import { runInThisContext } from 'vm';
 import { emitter } from './eventEmitter.js';
 
 const actions = { 
@@ -122,8 +122,10 @@ class Game {
             this.players.push( null );
         }
         this.recording = false;
+        this.tournament = false;
         this.hand = new Hand(  );
         this.mySeat = null;
+        this.playerBank = {};
     }
 
     writeEvent( input ){
@@ -149,7 +151,40 @@ function parseFrame(curGame, frameType, frameData) {
         case undefined:
             break;
 
-        default:
+        case "CONNECT_LOGIN_INFO":
+            for ( entry in frameData ){
+                
+                // for tournaments
+                switch (entry.pid){
+                    
+                    case "CO_OPTION_INFO":
+                        curGame.tournament = true;
+                        curGame.hand.bbVal = entry.bblind;
+                        curGame.hand.sbVal = entry.sblind;
+                        break;
+                    
+                    case "CO_TABLE_INFO":
+                        curGame.mySeat = entry.mySeat[0];
+
+                        entry.seatState.forEach((element, index) => {
+                            if ( element != 0 ){
+                                curGame.players[ index ] = new Player( entry.account[ index ], entry.regSeatNo[ index ] );
+                                console.log(`new player joining from seat: ${index + 1}`);
+            
+                                if ( element & 32 )
+                                    curGame.players[index].sittingOut = true;
+            
+                            }
+                        })
+            
+                        emitter.emit( 'TABLE_UPDATE' );
+                        break;
+
+
+
+                }
+            }
+
             break;
 
         // only sent when joining table
@@ -195,7 +230,6 @@ function parseFrame(curGame, frameType, frameData) {
             }
             break;
 
-        // contains: current game state
         case "CO_TABLE_INFO":
             frameData.seatState.forEach((element, index) => {
                 if ( element != 0 ){
@@ -391,7 +425,14 @@ function parseFrame(curGame, frameType, frameData) {
         case "PLAY_SEAT_INFO":
             if ( frameData.type == 1 ){
                 if ( frameData.state == 16 ){
-                    curGame.players[ frameData.seat - 1 ] = new Player( frameData.account );
+
+                    if ( curGame.tournament && frameData.regSeatNo && curGame.playerBank[ frameData.regSeatNo ] ){
+                        curGame.players[ frameData.seat - 1 ] = curGame.playerBank[ frameData.regSeatNo ];
+                    }
+                    else{
+                        curGame.players[ frameData.seat - 1 ] = new Player( frameData.account );
+                    }
+                        
                     emitter.emit( 'TABLE_UPDATE' );
                     console.log(`new player joining from seat: ${frameData.seat}`);    
                 }
@@ -402,7 +443,13 @@ function parseFrame(curGame, frameType, frameData) {
             }
             else if ( frameData.type == 0){
                 if ( frameData.state == 16 ){
+                    let curPlayer = curGame.playerBank[ curGame.players[ frameData.seat - 1 ] ];
+
+                    if ( curGame.tournament )
+                        curGame.playerBank[ curPlayer.id ] = curPlayer;
+
                     curGame.players[ frameData.seat - 1 ] = null;
+
                     emitter.emit( 'TABLE_UPDATE' );
                     console.log(`old player leaving from seat: ${frameData.seat}`);
                 }
