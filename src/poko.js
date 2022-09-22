@@ -1,5 +1,5 @@
 // import { inspect } from 'util';
-// import { runInThisContext } from 'vm';
+import { runInThisContext } from 'vm';
 import { emitter } from './eventEmitter.js';
 
 const actions = { 
@@ -151,6 +151,10 @@ function parseFrame(curGame, frameType, frameData) {
         case undefined:
             break;
 
+        
+        default:
+            break;
+
         case "CONNECT_LOGIN_INFO":
             for ( entry in frameData ){
                 
@@ -180,7 +184,8 @@ function parseFrame(curGame, frameType, frameData) {
                         emitter.emit( 'TABLE_UPDATE' );
                         break;
 
-
+                    default:
+                        break;
 
                 }
             }

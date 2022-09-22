@@ -14,11 +14,15 @@ ToDo:
 
 tournament
 changing tables
+display player IDs on tournament mode
+
 
 cash
 --------------------------------------------------
 - side pots
 -how do rebuys work ( PLAY_BUYIN_INFO?)
+-card shows for showdowns
+-display hands played
 -multiple table functionality
 
 low prio:
