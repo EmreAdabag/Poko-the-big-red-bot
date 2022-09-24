@@ -18,14 +18,59 @@
             height: 70vh;
             width: 60vw;
             border-radius: 80%;
-            border: 5px solid #800020;
+            border: 5px solid #8000203b;
             position:absolute;
             left:50%;
             top:50%;
             transform:translate(-50%,-50%);
         }
+        #b0{
+            position: relative;
+            top: 92%;
+            left: 0%;
+        }
+        #b1{
+            position: relative;
+            top: 75%;
+            left: -35%;
+        }
+        #b2{
+            position: relative;
+            top: 45%;
+            left: -45%;
+        }
+        #b3{
+            position: relative;
+            top: 18%;
+            left: -40%;
+        }
+        #b4{
+            position: relative;
+            top: -5%;
+            left: -20%;
+        }
+        #b5{
+            position: relative;
+            top: -10%;
+            left: 15%;
+        }
+        #b6{
+            position: relative;
+            top: 5%;
+            left: 40%;
+        }
+        #b7{
+            position: relative;
+            top: 30%;
+            left: 42%;
+        }
+        #b8{
+            position: relative;
+            top: 50%;
+            left: 33%;
+        }
         #s0{
-            top: 90vh;
+            top: 92vh;
             left: 50vw;
             position:absolute;
             transform:translate(-50%,-50%);
@@ -80,75 +125,93 @@
         }
         </style>
     </head>
-    <ellipse cx="75" cy="75" rx="200" ry="50" stroke="red" fill="transparent" stroke-width="5"/>
     <body>
-        <div class="oval"></div>
+        <div class="oval">
+            <div id="b0"><button onclick=getHands(0)>0 notable hands</button></div>
+            <div id="b1"><button onclick=getHands(1)>0 notable hands</button></div>
+            <div id="b2"><button onclick=getHands(2)>0 notable hands</button></div>
+            <div id="b3"><button onclick=getHands(3)>0 notable hands</button></div>
+            <div id="b4"><button onclick=getHands(4)>0 notable hands</button></div>
+            <div id="b5"><button onclick=getHands(5)>0 notable hands</button></div>
+            <div id="b6"><button onclick=getHands(6)>0 notable hands</button></div>
+            <div id="b7"><button onclick=getHands(7)>0 notable hands</button></div>
+            <div id="b8"><button onclick=getHands(8)>0 notable hands</button></div>
+        </div>
         <div>
             <button onclick=enterGame() style="top: 2%; left: 2%; position: absolute;">click me!</button>
         </div>
         
         <div id="s0">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s1">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s2">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s3">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s4">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s5">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s6">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         <div id="s7">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = no>c</h4>
+            <h4 class = vpip>c<c/h4>
+            <h4 class = pfrc>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = handsc></h4>
         </div>
         <div id="s8">
-            <h3 class = no></h3>
-            <h4 class = vpip></h4>
-            <h4 class = pfr></h4>
-            <h4 class = agg></h4>
-            <h4 class = bbwpohh></h4>
+            <h4 class = noc></h4>
+            <h4 class = vpip>c</h4>
+            <h4 class = pfr>c</h4>
+            <h4 class = agg>c</h4>
+            <h4 class = bbwpohh>c</h4>
+            <h4 class = hands>c</h4>
         </div>
         
         <script>
@@ -169,13 +232,27 @@
                     document.querySelector( '#s' + player + ' .pfr' ).textContent = 'PFR: ' + ( stats.pfr != null ? stats.pfr : '' );
                     document.querySelector( '#s' + player + ' .agg' ).textContent = 'AF: ' + ( stats.agg != null ? stats.agg : '' );
                     document.querySelector( '#s' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + ( stats.bbwpohh != null ? stats.bbwpohh : '' );
+                    document.querySelector( '#s' + player + ' .hands' ).textContent = 'hands: ' + ( stats.hands != null ? stats.hands : '' );
                 })
+            });
+
+            socket.on( 'ACTION_UPDATE', ( msg ) => {
+                console.log(msg);
+                let data = JSON.parse( msg );
+            });
+
+            socket.on( "RETURN_HANDS", ( msg ) => {
+                console.log(msg);
+                let data = JSON.parse( msg );
             });
 
             const enterGame = ( ) => {
                 socket.emit("initialize");
             }
 
+            const getHands = ( seat ) => {
+                socket.emit("GET_HANDS", seat )
+            }
         </script>
     </body>
     </html>

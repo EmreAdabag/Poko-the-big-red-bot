@@ -109,6 +109,8 @@ class Hand {
         this.rake = 0;
         this.timeline = [];
         this.phase = "X";
+        this.flopchop = null;
+        this.turnchop = null;
     }
 
 }
@@ -143,20 +145,16 @@ class Game {
 
 
 function parseFrame(curGame, frameType, frameData) {
-    if (curGame == undefined || curGame == null)
+    if (curGame == undefined || frameData == undefined )
         return;
 
     switch (frameType){
-
-        case undefined:
-            break;
-
         
         default:
             break;
 
-        case "CONNECT_LOGIN_INFO":
-            for ( entry in frameData ){
+        case undefined:
+            for ( const entry of frameData ){
                 
                 // for tournaments
                 switch (entry.pid){
@@ -176,7 +174,7 @@ function parseFrame(curGame, frameType, frameData) {
                                 console.log(`new player joining from seat: ${index + 1}`);
             
                                 if ( element & 32 )
-                                    curGame.players[index].sittingOut = true;
+                                    curGame.players[ index ].sittingOut = true;
             
                             }
                         })
@@ -192,8 +190,6 @@ function parseFrame(curGame, frameType, frameData) {
 
             break;
 
-        // only sent when joining table
-        // contains: blinds
         case "CO_OPTION_INFO":
             curGame.hand.bbVal = frameData.bblind;
             curGame.hand.sbVal = frameData.sblind;
@@ -201,8 +197,21 @@ function parseFrame(curGame, frameType, frameData) {
 
         case "CO_TABLE_STATE":
             curGame.hand.phase = phases[ frameData.tableState ];
-            if ( curGame.hand.phase == "X" )
-                curGame.recording = true;    
+            
+            switch ( curGame.hand.phase ){
+                case "X":
+                    curGame.recording = true;
+                    break;
+                case "F":
+                    emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length );
+                    break;
+                case "T":
+                    emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length );
+                    break;
+                case "R":
+                    emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length );
+                    break;
+            }  
             break;
 
         case "CO_DEALER_SEAT":
@@ -364,8 +373,8 @@ function parseFrame(curGame, frameType, frameData) {
             
 
         case "CO_CHIPTABLE_INFO":
-            curGame.hand.pot = frameData["curPot"];
-            curGame.hand.rake = frameData["curRake"];
+            curGame.hand.pot = frameData.curPot;
+            curGame.hand.rake = frameData.curRake;
             break;
 
         case "CO_CURRENT_PLAYER":
@@ -375,15 +384,18 @@ function parseFrame(curGame, frameType, frameData) {
             break;    
         
         case "CO_BCARD3_INFO":
-            curGame.writeEvent( frameData["bcard"] );
+            curGame.writeEvent( { flop: frameData.bcard } );
+            curGame.hand.flopchop = curGame.hand.timeline.length;
             break;
         
         case "CO_BCARD1_INFO":
-            curGame.writeEvent( frameData["card"] );
+            curGame.writeEvent( { card: frameData.card } );
+            if ( curGame.hand.turnchop == null )
+                curGame.hand.turnchop = curGame.hand.timeline.length;
             break;
 
         case "CO_PCARD_INFO":
-            curGame.players[ frameData["seat"] - 1 ].cards = frameData["card"];
+            curGame.players[ frameData.seat - 1 ].cards = frameData.card;
             break;
         
         case "CO_POT_INFO":
@@ -394,8 +406,6 @@ function parseFrame(curGame, frameType, frameData) {
                         "W",
                         element
                     );
-                    curGame.players[ index ].stats.amtWon += element;
-                    emitter.emit('win', [ index, 'W'] );
                 }
             })
             
@@ -406,8 +416,6 @@ function parseFrame(curGame, frameType, frameData) {
                         "W",
                         element
                     );
-                    curGame.players[ index ].stats.amtWon += element;
-                    emitter.emit('win', [ index ] );
                 }
             })
             break;
@@ -415,13 +423,14 @@ function parseFrame(curGame, frameType, frameData) {
         case "CO_RESULT_INFO":
             frameData.account.forEach(( element, index ) => {
                 if (curGame.players[ index ] != null)
+                    curGame.players[ index ].stats.amtWon +=  - element - curGame.players[ index ].stack;
                     curGame.players[ index ].stack = element;
             })
             break;
 
         // EMRE modify this for tournament play
         case "PLAY_CLEAR_INFO":
-            console.log("clearing hand");
+            // console.log("clearing hand");
             curGame.hand.resetHand(  );
             emitter.emit( 'TABLE_UPDATE' );
 

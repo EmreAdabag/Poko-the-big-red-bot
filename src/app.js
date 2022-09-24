@@ -9,6 +9,7 @@ import express from 'express';
 import { createServer } from 'http';
 import cors from 'cors';
 import { Server } from 'socket.io';
+import { endianness } from 'os';
 
 const app = express();
 const server = createServer(app);
@@ -24,9 +25,11 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
     
-    socket.on('initialize', ( ) => {
+    socket.on( 'initialize', ( ) => {
         initGame( );
-    })
+    });
+
+    socket.on( 'GET_HANDS', ( msg ))
 
     emitter.on( 'TABLE_UPDATE', ( ) => {
         if (curGame.mySeat == null) return;
@@ -37,22 +40,36 @@ io.on('connection', (socket) => {
             let plr = curGame.players[ i ];
             if ( plr != null )
                 presentPlayers[ ( i - curGame.mySeat + 9 ) % 9 ] = {
-                    seat: i,
+                    seat: curGame.tournament ? plr.id : i,
                     vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
                     pfr : Math.round( 10000 * plr.stats.pre.raisins / plr.stats.hands ) / 100,
                     agg : Math.round( 10000 * plr.stats.post.raisins / plr.stats.post.calls ) / 100,
-                    bbwpohh : Math.round( 10000 * ( plr.stack - plr.bought ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100
+                    bbwpohh : Math.round( 10000 * ( plr.stack - plr.bought ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100,
+                    hands : plr.stats.hands
                 };
         }
     
-        console.log(presentPlayers);
+        // console.log('sending update message' + JSON.stringify(presentPlayers));
         socket.emit( 'TABLE_UPDATE', JSON.stringify( presentPlayers ));
     });
 
+    emitter.on( 'ACTION_UPDATE', ( start, end ) => {
+        let msg = { street: str, data: {} };
 
-    // emre remember this when loading in breaks on tournment mode
-    // table initialization sent to client when your seat is received
-    // tournament mode mySeat != cash game mySeat
+        for ( let i = start; i < end; i++ ){
+            let turn = curGame.hand.timeline[ i ];
+
+            if ( msg.data[ turn.player ] === undefined ){
+                msg.data[ turn.player ] = [ { act: turn.action, amt: turn.amount } ];
+            }
+            else{
+                msg.data[ turn.player ].push( { act: turn.action, amt: turn.amount } );
+            }
+        }
+
+        console.log( 'action: ' + JSON.stringify( msg ));
+        socket.emit( 'ACTION_UPDATE', JSON.stringify( msg ));
+    });
 
 });
 

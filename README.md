@@ -11,22 +11,22 @@ module.exports = [ email, pass ];
 
 
 ToDo:
+should be fixed - stupid bug that breaks tournaments: CONNECT_LOGIN_INFO is within the lsit, not top level
+-little thing to show relevant hands
+should be fixed -how do rebuys work ( PLAY_BUYIN_INFO? probabaly not)
 
 tournament
-changing tables
-display player IDs on tournament mode
+-changing tables
 
 
 cash
 --------------------------------------------------
 - side pots
--how do rebuys work ( PLAY_BUYIN_INFO?)
--card shows for showdowns
--display hands played
--multiple table functionality
+
+
 
 low prio:
-
+-multiple table functionality
 
 
 CO_SELECT_REQ               indicates your turn
