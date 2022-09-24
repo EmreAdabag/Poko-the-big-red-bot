@@ -44,7 +44,7 @@ class Player {
         this.id = id;
         this.sittingOut = false;
         this.position = -1;
-        this.bought = stack;
+        this.bigHands = [];
 
         /*---------------------------
         *   VPIP (voluntary put-in-pot) = pre.vpip / hands
@@ -198,18 +198,18 @@ function parseFrame(curGame, frameType, frameData) {
         case "CO_TABLE_STATE":
             curGame.hand.phase = phases[ frameData.tableState ];
             
-            switch ( curGame.hand.phase ){
+            switch ( phases[ curGame.hand.phase ] ){
                 case "X":
                     curGame.recording = true;
                     break;
                 case "F":
-                    emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length );
+                    emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length, 'preflop' );
                     break;
                 case "T":
-                    emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length );
+                    emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length, 'flop' );
                     break;
                 case "R":
-                    emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length );
+                    emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length, 'turn' );
                     break;
             }  
             break;
@@ -228,7 +228,7 @@ function parseFrame(curGame, frameType, frameData) {
         case "CO_BLIND_INFO":
             // add timeline event
             curGame.writeTurn( 
-                curGame.players[ frameData.seat - 1 ],
+                frameData.seat - 1,
                 actions[ frameData.btn ],
                 frameData.bet + frameData.baseStakes     // check basestakes on tournament play
             );
@@ -286,7 +286,7 @@ function parseFrame(curGame, frameType, frameData) {
 
             // current hand gets new turn appended
             curGame.writeTurn( 
-                curPlayer, 
+                frameData.seat - 1, 
                 curAction,
                 frameData.raise != 0 ? frameData.raise : frameData.bet
                 );
@@ -361,7 +361,7 @@ function parseFrame(curGame, frameType, frameData) {
             frameData["btn"].forEach(( element, index ) => { 
                 if ( element != 0 ){
                     curGame.writeTurn(
-                        curGame.players[ index ],
+                        index,
                         actions[ element ],
                         frameData["raise"][index] != 0 ? frameData["raise"][index] : frameData["bet"][index]
                     );
@@ -402,7 +402,7 @@ function parseFrame(curGame, frameType, frameData) {
             frameData.returnHi.forEach(( element, index ) => {
                 if ( element != 0 ){
                     curGame.writeTurn(
-                        curGame.players[ index ],
+                        index,
                         "W",
                         element
                     );
@@ -412,7 +412,7 @@ function parseFrame(curGame, frameType, frameData) {
             frameData.returnLo.forEach(( element, index ) => {
                 if ( element != 0 ){
                     curGame.writeTurn(
-                        curGame.players[ index ],
+                        index,
                         "W",
                         element
                     );

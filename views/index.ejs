@@ -141,80 +141,35 @@
             <button onclick=enterGame() style="top: 2%; left: 2%; position: absolute;">click me!</button>
         </div>
         
-        <div id="s0">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s1">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s2">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s3">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s4">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s5">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s6">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
-        <div id="s7">
-            <h4 class = no>c</h4>
-            <h4 class = vpip>c<c/h4>
-            <h4 class = pfrc>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = handsc></h4>
-        </div>
-        <div id="s8">
-            <h4 class = noc></h4>
-            <h4 class = vpip>c</h4>
-            <h4 class = pfr>c</h4>
-            <h4 class = agg>c</h4>
-            <h4 class = bbwpohh>c</h4>
-            <h4 class = hands>c</h4>
-        </div>
+        <div id="s0"></div>
+        <div id="s1"></div>
+        <div id="s2"></div>
+        <div id="s3"></div>
+        <div id="s4"></div>
+        <div id="s5"></div>
+        <div id="s6"></div>
+        <div id="s7"></div>
+        <div id="s8"></div>
         
         <script>
+
+            const playerhtml = `<h3 class = no></h3>
+                                <h4 class = vpip></h4>
+                                <h4 class = pfr></h4>
+                                <h4 class = agg></h4>
+                                <h4 class = bbwpohh></h4>
+                                <h4 class = hands></h4>
+                                <div style="clear: both">
+                                    <h4 style="float: left" class="preflop" ></h4>
+                                    <h4 style="float: left" class="flop"></h4>
+                                    <h4 style="float: right" class="turn"></h4>
+                                </div>
+                                <hr />`
+
+
+            for ( let i = 0; i < 9; i++ )
+                document.querySelector( '#s' + i ).innerHTML = playerhtml;
+
             const socket = io('http://localhost:3000');
 
             socket.on( 'TABLE_UPDATE', ( msg ) => {
@@ -224,34 +179,51 @@
 
                 data.forEach( (stats, player) => {
                     if ( stats == null ) {
-                        document.querySelector( '#s' + player ).innerHTML = `<h3 class = no> </h3> <h4 class = vpip></h4> <h4 class = pfr></h4> <h4 class = agg></h4> <h4 class = bbwpohh></h4>`;
+                        document.querySelector( `#s${player}` ).innerHTML = playerhtml;
                         return;    
                     };
-                    document.querySelector( '#s' + player + ' .no' ).textContent = 'Player ' + ( stats.seat + 1 );
-                    document.querySelector( '#s' + player + ' .vpip' ).textContent = 'VPIP: ' + ( stats.vpip != null ? stats.vpip : '' );
-                    document.querySelector( '#s' + player + ' .pfr' ).textContent = 'PFR: ' + ( stats.pfr != null ? stats.pfr : '' );
-                    document.querySelector( '#s' + player + ' .agg' ).textContent = 'AF: ' + ( stats.agg != null ? stats.agg : '' );
-                    document.querySelector( '#s' + player + ' .bbwpohh' ).textContent = 'bbwpohh: ' + ( stats.bbwpohh != null ? stats.bbwpohh : '' );
-                    document.querySelector( '#s' + player + ' .hands' ).textContent = 'hands: ' + ( stats.hands != null ? stats.hands : '' );
+
+                    document.querySelector( `#s${player} .no` ).textContent = 'Player ' + ( stats.seat + 1 );
+                    document.querySelector( `#s${player} .vpip` ).textContent = 'VPIP: ' + ( stats.vpip != null ? stats.vpip : '' );
+                    document.querySelector( `#s${player} .pfr` ).textContent = 'PFR: ' + ( stats.pfr != null ? stats.pfr : '' );
+                    document.querySelector( `#s${player} .agg` ).textContent = 'AF: ' + ( stats.agg != null ? stats.agg : '' );
+                    document.querySelector( `#s${player} .bbwpohh` ).textContent = 'bbwpohh: ' + ( stats.bbwpohh != null ? stats.bbwpohh : '' );
+                    document.querySelector( `#s${player} .hands` ).textContent = 'hands: ' + ( stats.hands != null ? stats.hands : '' );
                 })
             });
 
             socket.on( 'ACTION_UPDATE', ( msg ) => {
                 console.log(msg);
-                let data = JSON.parse( msg );
+                let parsedmsg = JSON.parse( msg );
+                let street = parsedmsg.street;
+                let data = parsedmsg.data;
+
+
+                for ( const [ seat, turns ] of Object.entries( data ) ){
+                    let str = '';
+
+                    for ( turn in turns ){
+                        str += turn.act + turn.amt > 0 ? String( turn.amt ) : '';
+                    }
+
+                    document.querySelector( `#s${seat} .${street}` ).textContent = `${street}: ${str}`;
+                }
+
+
+                
             });
 
-            socket.on( "RETURN_HANDS", ( msg ) => {
+            socket.on( 'RETURN_HANDS', ( msg ) => {
                 console.log(msg);
                 let data = JSON.parse( msg );
             });
 
             const enterGame = ( ) => {
-                socket.emit("initialize");
+                socket.emit( 'initialize' );
             }
 
             const getHands = ( seat ) => {
-                socket.emit("GET_HANDS", seat )
+                socket.emit( 'GET_HANDS', String( seat ) )
             }
         </script>
     </body>

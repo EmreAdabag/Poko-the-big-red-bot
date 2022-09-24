@@ -29,7 +29,18 @@ io.on('connection', (socket) => {
         initGame( );
     });
 
-    socket.on( 'GET_HANDS', ( msg ))
+    socket.on( 'GET_HANDS', ( seat ) => {
+        console.log( parseInt( seat ) );
+
+        if ( curGame == undefined || curGame.mySeat == undefined )
+            return;
+
+        let playerNo = ( curGame.mySeat + parseInt( seat ) ) % 9;
+        console.log( 'getting hand for player: ' + playerNo);
+
+        if ( curGame.players[ playerNo ] != null )
+            socket.emit( 'RETURN_HANDS', JSON.stringify( curGame.players[ playerNo ].bigHands ) );
+    });
 
     emitter.on( 'TABLE_UPDATE', ( ) => {
         if (curGame.mySeat == null) return;
@@ -44,7 +55,7 @@ io.on('connection', (socket) => {
                     vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
                     pfr : Math.round( 10000 * plr.stats.pre.raisins / plr.stats.hands ) / 100,
                     agg : Math.round( 10000 * plr.stats.post.raisins / plr.stats.post.calls ) / 100,
-                    bbwpohh : Math.round( 10000 * ( plr.stack - plr.bought ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100,
+                    bbwpohh : Math.round( 10000 * ( plr.stats.amtWon ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100,
                     hands : plr.stats.hands
                 };
         }
@@ -53,17 +64,24 @@ io.on('connection', (socket) => {
         socket.emit( 'TABLE_UPDATE', JSON.stringify( presentPlayers ));
     });
 
-    emitter.on( 'ACTION_UPDATE', ( start, end ) => {
+    emitter.on( 'ACTION_UPDATE', ( start, end, str ) => {
         let msg = { street: str, data: {} };
+
+        // for making sure I got it right
+        console.log( ' before turn: ' + curGame.hand.timeline[ start - 1 ]);
+        console.log( ' turn: ' + curGame.hand.timeline[ start ]);
+        console.log( ' end turn: ' + curGame.hand.timeline[ end - 1 ]);
+
 
         for ( let i = start; i < end; i++ ){
             let turn = curGame.hand.timeline[ i ];
+            let seat = ( turn.player - curGame.mySeat + 9 ) % 9;
 
-            if ( msg.data[ turn.player ] === undefined ){
-                msg.data[ turn.player ] = [ { act: turn.action, amt: turn.amount } ];
+            if ( msg.data[ seat ] === undefined ){
+                msg.data[ seat ] = [ { act: turn.action, amt: turn.amount } ];
             }
             else{
-                msg.data[ turn.player ].push( { act: turn.action, amt: turn.amount } );
+                msg.data[ seat ].push( { act: turn.action, amt: turn.amount } );
             }
         }
 
