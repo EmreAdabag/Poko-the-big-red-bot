@@ -15,6 +15,7 @@ should be fixed - stupid bug that breaks tournaments: CONNECT_LOGIN_INFO is with
 -little thing to show relevant hands
 should be fixed -how do rebuys work ( PLAY_BUYIN_INFO? probabaly not)
 should be implemented - show previous actions on current hand
+-fix bbwpohh
 
 tournament
 -changing tables

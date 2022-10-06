@@ -18,7 +18,7 @@
             height: 70vh;
             width: 60vw;
             border-radius: 80%;
-            border: 5px solid #8000203b;
+            border: 5px solid #ffffff3b;
             position:absolute;
             left:50%;
             top:50%;
@@ -123,11 +123,37 @@
             position:absolute;
             transform:translate(-50%,-50%);
         }
+        #overlay {
+        position: fixed;
+        display: none;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2;
+        cursor: pointer;
+        }
+        * {
+         box-sizing: border-box;
+        }
+        .handview {
+            float: left;
+            width: 100%;
+            padding: 10px;
+        }
+        .clearfix::after {
+        content: "";
+        clear: both;
+        display: table;
+        }
         </style>
     </head>
     <body>
         <div class="oval">
-            <div id="b0"><button onclick=getHands(0)>0 notable hands</button></div>
+            <div id="b0"><button onclick=overlayon()>0 notable hands</button></div>
             <div id="b1"><button onclick=getHands(1)>0 notable hands</button></div>
             <div id="b2"><button onclick=getHands(2)>0 notable hands</button></div>
             <div id="b3"><button onclick=getHands(3)>0 notable hands</button></div>
@@ -137,9 +163,42 @@
             <div id="b7"><button onclick=getHands(7)>0 notable hands</button></div>
             <div id="b8"><button onclick=getHands(8)>0 notable hands</button></div>
         </div>
-        <div>
-            <button onclick=enterGame() style="top: 2%; left: 2%; position: absolute;">click me!</button>
+        <div id="overlay" onclick="overlayoff()">
+            <div class="clearfix">
+                <div class="handview" style="background-color:rgb(255, 109, 109)">
+                    <div class="handcards" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">HAND</h3>
+                        <h4 id="actualhand">KhJd</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p1 folds</p>
+                    </div>
+                    <div class="flopcards" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">FLOP</h3>
+                        <h4 id="actualflop">KdJh10c</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p1 folds</p>
+                    </div>
+                    <div class="turncard" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">TURN</h3>
+                        <h4 id="actualflop">Kc</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p3 folds</p>
+                    </div>
+                    <div class="rivercard" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">RIVER</h3>
+                        <h4 id="actualflop">Kc</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p4 folds</p>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <button id='enterbutton' onclick=testfn() style="top: 2%; left: 2%; position: absolute;">click me!</button>
         
         <div id="s0"></div>
         <div id="s1"></div>
@@ -167,8 +226,41 @@
                                 <hr />`
 
 
-            for ( let i = 0; i < 9; i++ )
+            const handhtml = `<div class="clearfix">
+                <div class="handview" style="background-color:rgb(255, 109, 109)">
+                    <div class="handcards" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">HAND</h3>
+                        <h4 id="actualhand">KhJd</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p1 folds</p>
+                    </div>
+                    <div class="flopcards" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">FLOP</h3>
+                        <h4 id="actualflop">KdJh10c</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p1 folds</p>
+                    </div>
+                    <div class="turncard" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">TURN</h3>
+                        <h4 id="actualflop">Kc</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p3 folds</p>
+                    </div>
+                    <div class="rivercard" style="float: left; padding: 20px;">
+                        <h3 style="top: 0%;">RIVER</h3>
+                        <h4 id="actualflop">Kc</h4>
+                    </div>
+                    <div class="street" style="float: left; padding: 20px;">
+                        <p>p4 folds</p>
+                    </div>
+                </div>`
+
+            for ( let i = 0; i < 9; i++ ){
                 document.querySelector( '#s' + i ).innerHTML = playerhtml;
+            }
 
             const socket = io('http://localhost:3000');
 
@@ -198,27 +290,44 @@
                 let street = parsedmsg.street;
                 let data = parsedmsg.data;
 
-
                 for ( const [ seat, turns ] of Object.entries( data ) ){
                     let str = '';
 
-                    for ( turn in turns ){
-                        str += turn.act + turn.amt > 0 ? String( turn.amt ) : '';
-                    }
-
+                    turns.forEach( (turn) => {
+                        str += turn.act + (turn.amt > 0 ? String( turn.amt ) : '') + ' ';
+                    })
+                    console.log(`seat: ${seat}, street: ${street}`)
+                    console.log(str)
                     document.querySelector( `#s${seat} .${street}` ).textContent = `${street}: ${str}`;
                 }
-
-
                 
             });
 
+            const testfn = () => {
+                hands = [{235:'a'},{235:'V'},{235:'b'}]
+                for (const hand of hands){
+                    document.getElementById("overlay").innerHTML += handhtml
+                }
+            }
+
             socket.on( 'RETURN_HANDS', ( msg ) => {
                 console.log(msg);
-                let data = JSON.parse( msg );
+                let hands = JSON.parse( msg );
+                for (const hand of hands){
+                    document.getElementById("overlay").append(handhtml)
+                }
             });
 
+            function overlayon(){
+                document.getElementById("overlay").style.display = "block"
+            }
+
+            function overlayoff(){
+                document.getElementById("overlay").style.display = "none"
+            }
+
             const enterGame = ( ) => {
+                document.getElementById('enterbutton').remove()
                 socket.emit( 'initialize' );
             }
 

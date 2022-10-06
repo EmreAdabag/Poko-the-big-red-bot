@@ -30,7 +30,7 @@ class Player {
         this.stats = {
             hands: 0,
             savedHands: 0,
-            amtWon : 0,
+            boughtIn: stack,
             vpipRecorded : false,
             pfrRecorded : false,
             pre: {
@@ -170,20 +170,9 @@ export function parseFrame(curGame, frameType, frameData) {
         case "CO_TABLE_STATE":
             curGame.hand.phase = phases[ frameData.tableState ];
             
-            switch ( phases[ curGame.hand.phase ] ){
-                case "X":
-                    curGame.recording = true;
-                    break;
-                case "F":
-                    emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length, 'preflop' );
-                    break;
-                case "T":
-                    emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length, 'flop' );
-                    break;
-                case "R":
-                    emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length, 'turn' );
-                    break;
-            }  
+            if ( curGame.hand.phase === "X")
+                curGame.recording = true;
+
             break;
 
         case "CO_DEALER_SEAT":
@@ -356,14 +345,20 @@ export function parseFrame(curGame, frameType, frameData) {
             break;    
         
         case "CO_BCARD3_INFO":
-            curGame.writeEvent( { flop: frameData.bcard } );
+            emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length, 'preflop' );
+            curGame.writeTurn( 'board', 'flop', { flop: frameData.bcard } );
             curGame.hand.flopchop = curGame.hand.timeline.length;
             break;
         
         case "CO_BCARD1_INFO":
-            curGame.writeEvent( { card: frameData.card } );
-            if ( curGame.hand.turnchop == null )
+            curGame.writeTurn( 'board', 'card', { card: frameData.card } );
+            if ( curGame.hand.turnchop == null ){
                 curGame.hand.turnchop = curGame.hand.timeline.length;
+                emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length, 'flop' );
+            }
+            else{
+                emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length, 'turn' );
+            }
             break;
 
         case "CO_PCARD_INFO":
@@ -396,7 +391,7 @@ export function parseFrame(curGame, frameType, frameData) {
         case "CO_RESULT_INFO":
             frameData.account.forEach(( element, index ) => {
                 if (curGame.players[ index ] != null)
-                    curGame.players[ index ].stats.amtWon +=  - element - curGame.players[ index ].stack;
+                    // curGame.players[ index ].stats.amtWon +=  - element - curGame.players[ index ].stack;
                     curGame.players[ index ].stack = element;
             })
             break;
@@ -420,7 +415,7 @@ export function parseFrame(curGame, frameType, frameData) {
                         curGame.players[ frameData.seat - 1 ] = new Player( frameData.account );
                     }
                         
-                    emitter.emit( 'TABLE_UPDATE' );
+                    // emitter.emit( 'TABLE_UPDATE' );
                     console.log(`new player joining from seat: ${frameData.seat}`);    
                 }
                 else if ( frameData.state == 32 ){
@@ -437,11 +432,16 @@ export function parseFrame(curGame, frameType, frameData) {
 
                     curGame.players[ frameData.seat - 1 ] = null;
 
-                    emitter.emit( 'TABLE_UPDATE' );
+                    // emitter.emit( 'TABLE_UPDATE' );
                     console.log(`old player leaving from seat: ${frameData.seat}`);
                 }
                 else if ( frameData.state == 32 ){
                     curGame.players[ frameData.seat - 1 ].sittingOut = false;
+                    
+                    if (curGame.players[ frameData.seat - 1 ].stack != frameData.account){
+                        curGame.players[ frameData.seat - 1 ].stats.boughtIn += curGame.players[ frameData.seat - 1 ].stack - frameData.account
+                    }
+                    
                     console.log(`player coming back from seat: ${frameData.seat}`);    
                 }
             }

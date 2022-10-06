@@ -1,3 +1,5 @@
+"use strict"
+
 // const { moduleExpression } = require('@babel/types');
 import { launch } from 'puppeteer';
 import { email, pass } from './creds.js';
@@ -7,7 +9,6 @@ import express from 'express';
 import { createServer } from 'http';
 // import cors from 'cors';
 import { Server } from 'socket.io';
-
 
 // starts local server
 const app = express();
@@ -46,7 +47,7 @@ io.on('connection', (socket) => {
         let playerNo = ( curGame.mySeat + parseInt( seat ) ) % 9;
         console.log( 'getting hand for player: ' + playerNo);
 
-        if ( curGame.players[ playerNo ] != null )
+        if ( curGame.players[ playerNo ] == null )
             socket.emit( 'RETURN_HANDS', JSON.stringify( curGame.players[ playerNo ].bigHands ) );
     });
 
@@ -63,7 +64,7 @@ io.on('connection', (socket) => {
                     vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
                     pfr : Math.round( 10000 * plr.stats.pre.raisins / plr.stats.hands ) / 100,
                     agg : Math.round( 10000 * plr.stats.post.raisins / plr.stats.post.calls ) / 100,
-                    bbwpohh : Math.round( 10000 * ( plr.stats.amtWon ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100,
+                    bbwpohh : Math.round( 10000 * ( plr.stack - plr.stats.boughtIn ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100,
                     hands : plr.stats.hands
                 };
         }
@@ -74,16 +75,19 @@ io.on('connection', (socket) => {
 
     emitter.on( 'ACTION_UPDATE', ( start, end, str ) => {
         let msg = { street: str, data: {} };
+        console.log('acted')
+        console.log(`start: ${start}, end: ${end}, str: ${str}`)
 
         // for making sure I got it right
-        console.log( ' before turn: ' + curGame.hand.timeline[ start - 1 ]);
-        console.log( ' turn: ' + curGame.hand.timeline[ start ]);
-        console.log( ' end turn: ' + curGame.hand.timeline[ end - 1 ]);
-
+        console.log( ' first turn: ' + curGame.hand.timeline[ start ].player + curGame.hand.timeline[ start ].action );
 
         for ( let i = start; i < end; i++ ){
             let turn = curGame.hand.timeline[ i ];
+            if ( turn.player === 'board' )
+                continue;
+
             let seat = ( turn.player - curGame.mySeat + 9 ) % 9;
+
 
             if ( msg.data[ seat ] === undefined ){
                 msg.data[ seat ] = [ { act: turn.action, amt: turn.amount } ];
