@@ -3,32 +3,40 @@ import { launch } from 'puppeteer';
 import { email, pass } from './creds.js';
 import { emitter } from './eventEmitter.js';
 import { Game, parseFrame } from './poko.js';
-var curGame;
-
 import express from 'express';
 import { createServer } from 'http';
-import cors from 'cors';
+// import cors from 'cors';
 import { Server } from 'socket.io';
-import { endianness } from 'os';
 
+
+// starts local server
 const app = express();
 const server = createServer(app);
 const io = new Server( server, { cors : { origin : '*' } });
 
 app.set('view engine', 'ejs');
-
 server.listen(3000);
-
 app.get('/', (req, res) => {
     res.render('index');
 })
 
+var curGame;
+
+/*-----------------------------------------------------------------------
+*
+*   facilitates server websocket activity
+*
+*-------------------------------------------------------------------------*/
 io.on('connection', (socket) => {
     
     socket.on( 'initialize', ( ) => {
         initGame( );
     });
 
+
+    //
+    //  returns notable hands for selected player
+    //
     socket.on( 'GET_HANDS', ( seat ) => {
         console.log( parseInt( seat ) );
 
@@ -91,7 +99,11 @@ io.on('connection', (socket) => {
 
 });
 
-
+/*-----------------------------------------------------------------------
+*
+*   Opens puppeteer window and begins monitoring websocket activity
+*
+*-------------------------------------------------------------------------*/
 async function initGame() 
 {
     const browser = await launch({

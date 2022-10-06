@@ -1,41 +1,7 @@
 // import { inspect } from 'util';
-import { runInThisContext } from 'vm';
+// import { runInThisContext } from 'vm';
 import { emitter } from './eventEmitter.js';
-
-const actions = { 
-    2 : "SB",       // SMALL BLIND
-    4 : "BB",       // BIG BLIND
-    8 : "P",        // POST
-    64 : "CH",      // CHECK
-    128 : "R",      // RAISE
-    256 : "C",      // CALL
-    512 : "RR",     // RE-RAISE
-    1024 : "F",     // FOLD
-    2048 : "CS",    // CALL-SHOVE
-    4096 : "S"      // SHOVE
-};
-// "W"      WIN
-
-const phases = {
-    2 : "X",        // PRE-PREFLOP
-    8 : "P",        // PREFLOP
-    16 : "F",       // FLOP
-    32 : "T",       // TURN
-    64 : "R"        // RIVER
-}
-
-
-const seats = { "seat1" : 0, 
-                "seat2" : 1, 
-                "seat3" : 2, 
-                "seat4" : 3, 
-                "seat5" : 4, 
-                "seat6" : 5, 
-                "seat7" : 6, 
-                "seat8" : 7, 
-                "seat9" : 8};
-
-
+import { actions, phases, seats } from './constants.js'
 
 class Player {
 
@@ -52,12 +18,18 @@ class Player {
         *           -OR if everyone limps/folds, bb checks and bets/calls/check-calls/check-raises the flop
         * 
         *   PFR (pre-flop raise) = pre.raisins / hands
+        * 
+        *   AF = bets + raises / calls
+        *           -postflop, not by street
+        * 
+        *   BBWPOHH = amtwon * 100 / big blind * hands
         *   
         * ---------------------------*/
         
         
         this.stats = {
             hands: 0,
+            savedHands: 0,
             amtWon : 0,
             vpipRecorded : false,
             pfrRecorded : false,
@@ -115,7 +87,7 @@ class Hand {
 
 }
 
-class Game {
+export class Game {
 
     constructor (  ) {
         console.log("game created");
@@ -144,7 +116,7 @@ class Game {
 }
 
 
-function parseFrame(curGame, frameType, frameData) {
+export function parseFrame(curGame, frameType, frameData) {
     if (curGame == undefined || frameData == undefined )
         return;
 
@@ -396,6 +368,7 @@ function parseFrame(curGame, frameType, frameData) {
 
         case "CO_PCARD_INFO":
             curGame.players[ frameData.seat - 1 ].cards = frameData.card;
+            saveStat( curGame.hand.timeline, frameData.seat - 1, curGame.players[ frameData.seat - 1 ] );
             break;
         
         case "CO_POT_INFO":
@@ -476,5 +449,26 @@ function parseFrame(curGame, frameType, frameData) {
     }
 }
 
+function saveStat( timeline, playerNo, player ){
+    
+    data = { hand : player.cards, preflop : '' };
 
-export { Game, parseFrame };
+    for ( const turn of timeline ){
+        
+        if ( turn.flop != undefined )
+            break;
+        
+        if ( turn.player != playerNo || 
+            turn.action === 'SB' ||
+            turn.action === 'BB' ||
+            turn.action === 'P')
+            continue;
+        
+        data.preflop += turn.action + turn.amount > 0 ? String( turn.amount ) + ' ' : ' ' ;
+    }
+
+    player.bigHands.push( data );
+    player.stats.savedHands++;
+}
+
+// export { parseFrame };
