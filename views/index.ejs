@@ -135,6 +135,8 @@
         background-color: rgba(0,0,0,0.5);
         z-index: 2;
         cursor: pointer;
+        overflow-y: scroll;
+        overflow-x: scroll;
         }
         * {
          box-sizing: border-box;
@@ -153,7 +155,7 @@
     </head>
     <body>
         <div class="oval">
-            <div id="b0"><button onclick=overlayon()>0 notable hands</button></div>
+            <div id="b0"><button onclick=getHands(0)>0 notable hands</button></div>
             <div id="b1"><button onclick=getHands(1)>0 notable hands</button></div>
             <div id="b2"><button onclick=getHands(2)>0 notable hands</button></div>
             <div id="b3"><button onclick=getHands(3)>0 notable hands</button></div>
@@ -164,41 +166,38 @@
             <div id="b8"><button onclick=getHands(8)>0 notable hands</button></div>
         </div>
         <div id="overlay" onclick="overlayoff()">
-            <div class="clearfix">
+            <!-- <div class="clearfix" id="turn{handidx}" >
                 <div class="handview" style="background-color:rgb(255, 109, 109)">
                     <div class="handcards" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">HAND</h3>
-                        <h4 id="actualhand">KhJd</h4>
+                        <h4 class="actualhand"></h4>
+                        <h3 style="top: 0%;">POS</h3>
+                        <h4 class="actualpos"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p1 folds</p>
+                    <div class="pf" style="float: left; padding: 20px;">
                     </div>
                     <div class="flopcards" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">FLOP</h3>
-                        <h4 id="actualflop">KdJh10c</h4>
+                        <h4 class="actualflop"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p1 folds</p>
+                    <div class="flop" style="float: left; padding: 20px;">
                     </div>
                     <div class="turncard" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">TURN</h3>
-                        <h4 id="actualflop">Kc</h4>
+                        <h4 class="actualturn"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p3 folds</p>
+                    <div class="turn" style="float: left; padding: 20px;">
                     </div>
                     <div class="rivercard" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">RIVER</h3>
-                        <h4 id="actualflop">Kc</h4>
+                        <h4 class="actualriver"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p4 folds</p>
+                    <div class="river" style="float: left; padding: 20px;">
                     </div>
-                </div>
-            </div>
+                </div> -->
         </div>
         
-        <button id='enterbutton' onclick=testfn() style="top: 2%; left: 2%; position: absolute;">click me!</button>
+        <button id='enterbutton' onclick=enterGame() style="top: 2%; left: 2%; position: absolute;">click me!</button>
         
         <div id="s0"></div>
         <div id="s1"></div>
@@ -226,35 +225,33 @@
                                 <hr />`
 
 
-            const handhtml = `<div class="clearfix">
+            const handhtml = `<div class="clearfix" id="turn{handidx}" >
                 <div class="handview" style="background-color:rgb(255, 109, 109)">
                     <div class="handcards" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">HAND</h3>
-                        <h4 id="actualhand">KhJd</h4>
+                        <h4 class="actualhand"></h4>
+                        <h3 style="top: 0%;">POS</h3>
+                        <h4 class="actualpos"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p1 folds</p>
+                    <div class="pf" style="float: left; padding: 20px;">
                     </div>
                     <div class="flopcards" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">FLOP</h3>
-                        <h4 id="actualflop">KdJh10c</h4>
+                        <h4 class="actualflop"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p1 folds</p>
+                    <div class="flop" style="float: left; padding: 20px;">
                     </div>
                     <div class="turncard" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">TURN</h3>
-                        <h4 id="actualflop">Kc</h4>
+                        <h4 class="actualturn"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p3 folds</p>
+                    <div class="turn" style="float: left; padding: 20px;">
                     </div>
                     <div class="rivercard" style="float: left; padding: 20px;">
                         <h3 style="top: 0%;">RIVER</h3>
-                        <h4 id="actualflop">Kc</h4>
+                        <h4 class="actualriver"></h4>
                     </div>
-                    <div class="street" style="float: left; padding: 20px;">
-                        <p>p4 folds</p>
+                    <div class="river" style="float: left; padding: 20px;">
                     </div>
                 </div>`
 
@@ -304,18 +301,79 @@
             });
 
             const testfn = () => {
-                hands = [{235:'a'},{235:'V'},{235:'b'}]
-                for (const hand of hands){
-                    document.getElementById("overlay").innerHTML += handhtml
+                let playerno = 0
+                hands = [[{'player':'board', 'action':'cards!!!!! BITHC'}],[{'player':'board', 'action':'cards!!!!! BITHC'}]]
+                let playerhand = 'askljdhfasdjklahjsdf'
+                hands.forEach( (hand, idx) => {
+                    let newhtml = handhtml.replace('{handidx}', idx)
+                    document.getElementById("overlay").innerHTML += newhtml;
+                    parsehand( playerno, playerhand, hand, idx);
+                })
+            }
+
+            function parsehand( playerno, pcards, hand, idx ){
+                let flopbc = null;
+                let turnbc = null;
+                let riverbc = null;
+
+
+                let handcards = document.querySelector(`#turn${idx} .actualhand`)
+                let pos = document.querySelector(`#turn${idx} .actualpos`)
+                let pf = document.querySelector(`#turn${idx} .pf`)
+                let flopcards = document.querySelector(`#turn${idx} .actualflop`)
+                let flop = document.querySelector(`#turn${idx} .flop`)
+                let turncard = document.querySelector(`#turn${idx} .actualturn`)
+                let turn = document.querySelector(`#turn${idx} .turn`)
+                let rivercard = document.querySelector(`#turn${idx} .actualriver`)
+                let river = document.querySelector(`#turn${idx} .river`)
+
+                handcards.appendChild(document.createTextNode(pcards))
+
+                for (const turn of hand){
+                    if ( flopbc === null && turn.player === 'board' ){
+                        flopbc = turn.action;                    // make this compatable
+                        flopcards.appendChild(document.createTextNode(flopbc))            // make this real cards
+                        continue;
+                    }
+                    else if ( turnbc === null && turn.player === 'board' ){
+                        turnbc = turn.action;
+                        turncard.appendChild(document.createTextNode(turnbc))
+                        continue;
+                    }
+                    else if ( riverbc  === null && turn.player === 'board' ){
+                        riverbc = turn.action;
+                        rivercard.appendChild(document.createTextNode(riverbc))
+                        continue;
+                    }
+                    
+                    newturn = `${ playerno = turn.player ? ('player ' + playerno + ' '): ''}${turn.action} ${turn.amt > 0 ? turn.amt : ''}`
+
+                    if (flopbc === null){
+                        pf.appendChild(document.createTextNode(newturn))  
+                    }
+                    else if (turnbc === null){
+                        flop.appendChild(document.createTextNode(newturn))
+                    }
+                    else if (riverbc === null){
+                        turn.appendChild(document.createTextNode(newturn))
+                    }
+                    else{
+                        river.appendChild(document.createTextNode(newturn))
+                    }
                 }
             }
 
             socket.on( 'RETURN_HANDS', ( msg ) => {
+                overlayon();
                 console.log(msg);
-                let hands = JSON.parse( msg );
-                for (const hand of hands){
-                    document.getElementById("overlay").append(handhtml)
-                }
+                let data = JSON.parse( msg );
+                let hands = data.hands
+
+                hands.forEach( (hand, idx) => {
+                    let newhtml = handhtml.replace('{handidx}', idx)
+                    document.getElementById("overlay").innerHTML += newhtml;
+                    parsehand( hand.pno, hand.pcards, hand.timeline, idx);
+                })
             });
 
             function overlayon(){

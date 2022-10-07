@@ -47,7 +47,8 @@ io.on('connection', (socket) => {
         let playerNo = ( curGame.mySeat + parseInt( seat ) ) % 9;
         console.log( 'getting hand for player: ' + playerNo);
 
-        if ( curGame.players[ playerNo ] == null )
+        if ( curGame.players[ playerNo ] != null )
+            console.log(curGame.players[ playerNo ].bigHands)
             socket.emit( 'RETURN_HANDS', JSON.stringify( curGame.players[ playerNo ].bigHands ) );
     });
 
@@ -75,11 +76,11 @@ io.on('connection', (socket) => {
 
     emitter.on( 'ACTION_UPDATE', ( start, end, str ) => {
         let msg = { street: str, data: {} };
-        console.log('acted')
-        console.log(`start: ${start}, end: ${end}, str: ${str}`)
+        // console.log('acted')
+        // console.log(`start: ${start}, end: ${end}, str: ${str}`)
 
-        // for making sure I got it right
-        console.log( ' first turn: ' + curGame.hand.timeline[ start ].player + curGame.hand.timeline[ start ].action );
+        // // for making sure I got it right
+        // console.log( ' first turn: ' + curGame.hand.timeline[ start ].player + curGame.hand.timeline[ start ].action );
 
         for ( let i = start; i < end; i++ ){
             let turn = curGame.hand.timeline[ i ];

@@ -362,8 +362,8 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_PCARD_INFO":
-            curGame.players[ frameData.seat - 1 ].cards = frameData.card;
-            saveStat( curGame.hand.timeline, frameData.seat - 1, curGame.players[ frameData.seat - 1 ] );
+            // curGame.players[ frameData.seat - 1 ].cards = frameData.card;
+            // saveHand( curGame.hand.timeline, frameData.seat - 1, curGame.players[ frameData.seat - 1 ], frameData.card );
             break;
         
         case "CO_POT_INFO":
@@ -389,10 +389,14 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_RESULT_INFO":
+            console.log('result info recieved')
             frameData.account.forEach(( element, index ) => {
                 if (curGame.players[ index ] != null)
+                    console.log('got here')
                     // curGame.players[ index ].stats.amtWon +=  - element - curGame.players[ index ].stack;
                     curGame.players[ index ].stack = element;
+                    if (recording)      // whatever here
+                        saveHand(  curGame.players[ index ], index, [0,0], curGame.hand.timeline )
             })
             break;
 
@@ -448,27 +452,14 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
     }
 }
-
-function saveStat( timeline, playerNo, player ){
+function saveHand(  player, pno, pcards, timeline ){
+    console.log('saving hand for player: ' + pno)
+    console.log(`player: ${player}
+    cards: ${pcards}
+    tl: ${timeline}`)
     
-    data = { hand : player.cards, preflop : '' };
+    newhand = {'pno': pno, 'pcards': pcards, 'timeline': timeline }
 
-    for ( const turn of timeline ){
-        
-        if ( turn.flop != undefined )
-            break;
-        
-        if ( turn.player != playerNo || 
-            turn.action === 'SB' ||
-            turn.action === 'BB' ||
-            turn.action === 'P')
-            continue;
-        
-        data.preflop += turn.action + turn.amount > 0 ? String( turn.amount ) + ' ' : ' ' ;
-    }
-
-    player.bigHands.push( data );
+    player.bigHands.push( newhand );
     player.stats.savedHands++;
 }
-
-// export { parseFrame };
