@@ -39,6 +39,7 @@ io.on('connection', (socket) => {
     //  returns notable hands for selected player
     //
     socket.on( 'GET_HANDS', ( seat ) => {
+        // definitely a problem in here
         console.log( parseInt( seat ) );
 
         if ( curGame == undefined || curGame.mySeat == undefined )
@@ -47,9 +48,10 @@ io.on('connection', (socket) => {
         let playerNo = ( curGame.mySeat + parseInt( seat ) ) % 9;
         console.log( 'getting hand for player: ' + playerNo);
 
-        if ( curGame.players[ playerNo ] != null )
+        if ( curGame.players[ playerNo ] != null ){
             console.log(curGame.players[ playerNo ].bigHands)
             socket.emit( 'RETURN_HANDS', JSON.stringify( curGame.players[ playerNo ].bigHands ) );
+        }
     });
 
     emitter.on( 'TABLE_UPDATE', ( ) => {
