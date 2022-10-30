@@ -295,48 +295,48 @@
                 let riverbc = null;
 
 
-                let handcards = document.querySelector(`#hand${idx} .actualhand`)
-                let pos = document.querySelector(`#hand${idx} .actualpos`)
-                let pf = document.querySelector(`#hand${idx} .pf`)
-                let flopcards = document.querySelector(`#hand${idx} .actualflop`)
-                let flop = document.querySelector(`#hand${idx} .flop`)
-                let turncard = document.querySelector(`#hand${idx} .actualturn`)
-                let turn = document.querySelector(`#hand${idx} .turn`)
-                let rivercard = document.querySelector(`#hand${idx} .actualriver`)
-                let river = document.querySelector(`#hand${idx} .river`)
+                let handcards_selector = document.querySelector(`#hand${idx} .actualhand`)
+                let pos_selector = document.querySelector(`#hand${idx} .actualpos`)
+                let pf_selector = document.querySelector(`#hand${idx} .pf`)
+                let flopcards_selector = document.querySelector(`#hand${idx} .actualflop`)
+                let flop_selector = document.querySelector(`#hand${idx} .flop`)
+                let turncard_selector = document.querySelector(`#hand${idx} .actualturn`)
+                let turn_selector = document.querySelector(`#hand${idx} .turn`)
+                let rivercard_selector = document.querySelector(`#hand${idx} .actualriver`)
+                let river_selector = document.querySelector(`#hand${idx} .river`)
 
-                handcards.appendChild(document.createTextNode(pcards))
+                handcards_selector.appendChild(document.createTextNode(pcards))
 
                 for (const turn of tl){
                     if ( flopbc === null && turn.player === 'board' ){
                         flopbc = turn.action;                    // make this compatable
-                        flopcards.appendChild(document.createTextNode(flopbc))            // make this real cards
+                        flopcards_selector.appendChild(document.createTextNode(flopbc))            // make this real cards
                         continue;
                     }
                     else if ( turnbc === null && turn.player === 'board' ){
                         turnbc = turn.action;
-                        turncard.appendChild(document.createTextNode(turnbc))
+                        turncard_selector.appendChild(document.createTextNode(turnbc))
                         continue;
                     }
                     else if ( riverbc  === null && turn.player === 'board' ){
                         riverbc = turn.action;
-                        rivercard.appendChild(document.createTextNode(riverbc))
+                        rivercard_selector.appendChild(document.createTextNode(riverbc))
                         continue;
                     }
                     
                     newturn = `player: ${playerno} ${turn.action} ${turn.amount}`
 
                     if (flopbc === null){
-                        pf.appendChild(document.createTextNode(newturn))  
+                        pf_selector.appendChild(document.createTextNode(newturn))  
                     }
                     else if (turnbc === null){
-                        flop.appendChild(document.createTextNode(newturn))
+                        flop_selector.appendChild(document.createTextNode(newturn))
                     }
                     else if (riverbc === null){
-                        turn.appendChild(document.createTextNode(newturn))
+                        turn_selector.appendChild(document.createTextNode(newturn))
                     }
                     else{
-                        river.appendChild(document.createTextNode(newturn))
+                        river_selector.appendChild(document.createTextNode(newturn))
                     }
                 }
             }
