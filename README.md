@@ -11,21 +11,26 @@ module.exports = [ email, pass ];
 
 
 ToDo:
+should be fixed - stupid bug that breaks tournaments: CONNECT_LOGIN_INFO is within the lsit, not top level
+-little thing to show relevant hands
+should be fixed -how do rebuys work ( PLAY_BUYIN_INFO? probabaly not)
+-fix bbwpohh
 
-- how are changing blinds sent?
+tournament
+-changing tables
+
+
+cash
+--------------------------------------------------
 - side pots
 
+
+
 low prio:
-
-- know when you're involved in the hand (what seat are we)
-- for tournament, fix your shit, finding your own seat is different. Might wnat a flag for tournament vs cash
+-multiple table functionality
 
 
-
-
-CO_TABLE_INFO               contains game info when joining a table
-PLAY_SEAT_INFO              contains your seat no
-
+CO_SELECT_REQ               indicates your turn
 
 
 
