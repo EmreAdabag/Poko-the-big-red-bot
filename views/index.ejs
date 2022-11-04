@@ -10,6 +10,8 @@
     <style>
     ul {
     list-style-type: none;
+    padding: 0;
+    text-align: left;
     }
     * {
         margin: 0;
@@ -303,7 +305,7 @@
 
         function parsehand( pno, pcards, tl, idx ){
 
-            console.log(`parsing playerno : ${pno} cards : ${pcards} idx : ${idx}`)
+            // console.log(`parsing playerno : ${pno} cards : ${pcards} idx : ${idx}`)
             let flopbc = null;
             let turnbc = null;
             let riverbc = null;
@@ -320,7 +322,7 @@
             let river_selector = document.querySelector(`#hand${idx} .river`)
 
             handcards_selector.appendChild(document.createTextNode(pcards))
-            pos_selector.appendChild(document.createTextNode(pno))
+            pos_selector.appendChild(document.createTextNode(pno)+1)
 
             for (const turn of tl){
                 if ( flopbc === null && turn.player === 'board' ){
@@ -340,7 +342,7 @@
                 }
                 
                 let li = document.createElement("li");
-                newturn = `player: ${pno} ${turn.action} ${turn.amount}`
+                newturn = `P${turn.player+1}: ${turn.action} ${turn.amount}`
                 li.appendChild(document.createTextNode(newturn));
 
                 if (flopbc === null){
