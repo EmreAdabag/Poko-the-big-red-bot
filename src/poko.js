@@ -1,5 +1,3 @@
-// import { inspect } from 'util';
-// import { runInThisContext } from 'vm';
 import { emitter } from './eventEmitter.js';
 import { actions, phases, seats } from './constants.js'
 
@@ -75,8 +73,6 @@ class Hand {
         // console.log(this.timeline);
         // might want to update bbVal, sbVal
         this.btn = -1;
-        this.bb = -1;
-        this.sb = -1;
         this.pot = [];
         this.rake = 0;
         this.timeline = [];
@@ -239,7 +235,6 @@ export function parseFrame(curGame, frameType, frameData) {
                     player.stats.hands++;
                     player.stats.vpipRecorded = false;
                     player.stats.pfrRecorded = false;
-                    // EMRE consider ordering cards
                     player.cards = cards;
                 }
             })
@@ -354,12 +349,12 @@ export function parseFrame(curGame, frameType, frameData) {
         
         case "CO_BCARD3_INFO":
             emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length, 'preflop' );
-            curGame.writeTurn( 'board', 'flop', { flop: frameData.bcard } );
+            curGame.writeTurn( 'board', 'flop', frameData.bcard );
             curGame.hand.flopchop = curGame.hand.timeline.length;
             break;
         
         case "CO_BCARD1_INFO":
-            curGame.writeTurn( 'board', 'card', { card: frameData.card } );
+            curGame.writeTurn( 'board', 'card', frameData.card );
             if ( curGame.hand.turnchop == null ){
                 curGame.hand.turnchop = curGame.hand.timeline.length;
                 emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length, 'flop' );
@@ -459,7 +454,7 @@ export function parseFrame(curGame, frameType, frameData) {
                     curGame.players[ frameData.seat - 1 ].sittingOut = false;
                     
                     if (curGame.players[ frameData.seat - 1 ].stack != frameData.account){
-                        curGame.players[ frameData.seat - 1 ].stats.boughtIn += curGame.players[ frameData.seat - 1 ].stack - frameData.account
+                        curGame.players[ frameData.seat - 1 ].stats.boughtIn +=  frameData.account  - curGame.players[ frameData.seat - 1 ].stack
                     }
                     
                     console.log(`player coming back from seat: ${frameData.seat}`);    
@@ -468,6 +463,8 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
     }
 }
+
+
 function saveHand(  player, pno, pcards, timeline ){
     console.log('saving hand for player: ' + pno)               // PRINT
     console.log(`player: ${player}                              // PRINT

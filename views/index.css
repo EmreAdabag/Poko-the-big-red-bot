@@ -1,0 +1,148 @@
+ul {
+list-style-type: none;
+padding: 0;
+text-align: left;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+.oval {
+    height: 70vh;
+    width: 60vw;
+    border-radius: 80%;
+    border: 5px solid #ffffff3b;
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+}
+#b0{
+    position: relative;
+    top: 92%;
+    left: 0%;
+}
+#b1{
+    position: relative;
+    top: 75%;
+    left: -35%;
+}
+#b2{
+    position: relative;
+    top: 45%;
+    left: -45%;
+}
+#b3{
+    position: relative;
+    top: 18%;
+    left: -40%;
+}
+#b4{
+    position: relative;
+    top: -5%;
+    left: -20%;
+}
+#b5{
+    position: relative;
+    top: -10%;
+    left: 15%;
+}
+#b6{
+    position: relative;
+    top: 5%;
+    left: 40%;
+}
+#b7{
+    position: relative;
+    top: 30%;
+    left: 42%;
+}
+#b8{
+    position: relative;
+    top: 50%;
+    left: 33%;
+}
+#s0{
+    top: 92vh;
+    left: 50vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s1{
+    top: 80vh;
+    left: 23vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s2{
+    top: 58vh;
+    left: 16vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s3{
+    top: 24vh;
+    left: 17vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s4{
+    top: 8vh;
+    left: 37vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s5{
+    top: 8vh;
+    left: 59vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s6{
+    top: 24vh;
+    left: 83vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s7{
+    top: 58vh;
+    left: 84vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#s8{
+    top: 80vh;
+    left: 73vw;
+    position:absolute;
+    transform:translate(-50%,-50%);
+}
+#overlay {
+position: fixed;
+display: none;
+width: 100%;
+height: 100%;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: rgba(0,0,0,0.5);
+z-index: 2;
+cursor: pointer;
+overflow-y: scroll;
+overflow-x: scroll;
+}
+* {
+    box-sizing: border-box;
+}
+.handview {
+    float: left;
+    width: 100%;
+    padding: 10px;
+}
+.clearfix::after {
+content: "";
+clear: both;
+display: table;
+}

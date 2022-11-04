@@ -1,25 +1,40 @@
 "use strict"
 
-// const { moduleExpression } = require('@babel/types');
 import { launch } from 'puppeteer';
 import { email, pass } from './creds.js';
 import { emitter } from './eventEmitter.js';
 import { Game, parseFrame } from './poko.js';
 import express from 'express';
+import path from 'path';
 import { createServer } from 'http';
-// import cors from 'cors';
 import { Server } from 'socket.io';
+import {fileURLToPath} from 'url';
 
-// starts local server
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+const PORT = 3000;
+
 const app = express();
 const server = createServer(app);
 const io = new Server( server, { cors : { origin : '*' } });
 
 app.set('view engine', 'ejs');
-server.listen(3000);
+server.listen(PORT);
 app.get('/', (req, res) => {
     res.render('index');
 })
+
+app.get('/manager.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/manager.js'));
+})
+
+app.get('/index.css', (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/index.css'));
+})
+
 
 var curGame;
 
@@ -67,7 +82,7 @@ io.on('connection', (socket) => {
                     vpip : Math.round( 10000 * plr.stats.pre.vpip / plr.stats.hands ) / 100,
                     pfr : Math.round( 10000 * plr.stats.pre.raisins / plr.stats.hands ) / 100,
                     agg : Math.round( 10000 * plr.stats.post.raisins / plr.stats.post.calls ) / 100,
-                    bbwpohh : Math.round( 10000 * ( plr.stack - plr.stats.boughtIn ) / ( curGame.hand.bbVal * plr.stats.hands ) ) / 100,
+                    bbwpohh : Math.round( 100 * ( plr.stack - plr.stats.boughtIn ) / ( curGame.hand.bbVal * plr.stats.hands ) ),
                     hands : plr.stats.hands
                 };
         }
