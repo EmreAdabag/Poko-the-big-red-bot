@@ -72,6 +72,7 @@ class Hand {
     resetHand(  ){
         // console.log(this.timeline);
         // might want to update bbVal, sbVal
+        this.bbval = 0;
         this.btn = -1;
         this.pot = [];
         this.rake = 0;
@@ -365,8 +366,7 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_PCARD_INFO":
-            // curGame.players[ frameData.seat - 1 ].cards = frameData.card;
-            // saveHand( curGame.hand.timeline, frameData.seat - 1, curGame.players[ frameData.seat - 1 ], frameData.card );
+            saveHand( curGame.players[ frameData.seat - 1 ], frameData.seat - 1, frameData.card, curGame.hand.timeline );
             break;
         
         case "CO_POT_INFO":
@@ -392,31 +392,36 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_RESULT_INFO":
-            console.log('result info recieved')                         // PRINT
-            console.log(`here are players ${curGame.players}`)      // PRINT
-            console.log(`here are accs ${frameData.account}`)       // PRINT
+            // console.log('result info recieved')                     // PRINT
+            // console.log(`here are players ${curGame.players}`)      // PRINT
+            // console.log(`here are accs ${frameData.account}`)       // PRINT
 
             frameData.account.forEach( ( element, index ) => {
                 try{
                     if (curGame.players[ index ] != null){
-                        // curGame.players[ index ].stats.amtWon +=  - element - curGame.players[ index ].stack;
+                        if(!curGame.recording){
+                            curGame.players[ index ].stats.boughtIn = element;
+                        }
                         curGame.players[ index ].stack = element;
-                        if (curGame.recording)      // whatever here
-                            saveHand(  curGame.players[ index ], index, [0,0], curGame.hand.timeline )
+                        console.log('player ' + index + ' stack ' + element + ' buyin ' + curGame.players[index].stats.boughtIn);
                     }
                 }
                 catch( e ){
-                    console.log(`issue here ${e}`)
+                    console.log(`issue saving result ${e}`)
                 }
             })
             break;
 
-        // EMRE modify this for tournament play
+        // EMRE modify this for tournament play ? maybe not?
         case "PLAY_CLEAR_INFO":
             // console.log("clearing hand");
             curGame.hand.resetHand(  );
             emitter.emit( 'TABLE_UPDATE' );
 
+            break;
+
+        case "PLAY_ACCOUNT_CASH_RES":
+            curGame.players[ frameData.seat - 1 ].stats.boughtIn = frameData.cash;
             break;
 
         case "PLAY_SEAT_INFO":
@@ -425,6 +430,9 @@ export function parseFrame(curGame, frameType, frameData) {
 
                     if ( curGame.tournament && frameData.regSeatNo && curGame.playerBank[ frameData.regSeatNo ] ){
                         curGame.players[ frameData.seat - 1 ] = curGame.playerBank[ frameData.regSeatNo ];
+                    }
+                    else if( curGame.tournament ){
+                        curGame.players[ frameData.seat - 1 ] = new Player( frameData.account, frameData.regSeatNo );
                     }
                     else{
                         curGame.players[ frameData.seat - 1 ] = new Player( frameData.account );
@@ -440,8 +448,8 @@ export function parseFrame(curGame, frameType, frameData) {
             }
             else if ( frameData.type == 0){
                 if ( frameData.state == 16 ){
-                    let curPlayer = curGame.playerBank[ curGame.players[ frameData.seat - 1 ] ];
-
+                    let curPlayer = curGame.players[ frameData.seat - 1 ];
+                    
                     if ( curGame.tournament )
                         curGame.playerBank[ curPlayer.id ] = curPlayer;
 
@@ -465,9 +473,9 @@ export function parseFrame(curGame, frameType, frameData) {
 }
 
 
-function saveHand(  player, pno, pcards, timeline ){
+function saveHand( player, pno, pcards, timeline ){
     console.log('saving hand for player: ' + pno)               // PRINT
-    console.log(`player: ${player}                              // PRINT
+    console.log(`player: ${player}                              
     cards: ${pcards}
     tl: ${timeline}`)
     
@@ -478,7 +486,7 @@ function saveHand(  player, pno, pcards, timeline ){
         player.stats.savedHands++;
     }
     catch ( e ){
-        console.log(`wtf:  ${e}`)
+        console.log(`issue saving hand:  ${e}`)
     }
 
 }
