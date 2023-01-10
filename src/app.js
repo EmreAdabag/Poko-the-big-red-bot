@@ -54,17 +54,15 @@ io.on('connection', (socket) => {
     //  returns notable hands for selected player
     //
     socket.on( 'GET_HANDS', ( seat ) => {
-        // definitely a problem in here
-        console.log( parseInt( seat ) );
 
         if ( curGame == undefined || curGame.mySeat == undefined )
             return;
 
         let playerNo = ( curGame.mySeat + parseInt( seat ) ) % 9;
-        console.log( 'getting hand for player: ' + playerNo);
+        // console.log( 'getting hand for player: ' + playerNo);
 
         if ( curGame.players[ playerNo ] != null ){
-            console.log(curGame.players[ playerNo ].bigHands)
+            // console.log(curGame.players[ playerNo ].bigHands)
             socket.emit( 'RETURN_HANDS', JSON.stringify( curGame.players[ playerNo ].bigHands ) );
         }
     });
@@ -83,7 +81,8 @@ io.on('connection', (socket) => {
                     pfr : Math.round( 10000 * plr.stats.pre.raisins / plr.stats.hands ) / 100,
                     agg : Math.round( 10000 * plr.stats.post.raisins / plr.stats.post.calls ) / 100,
                     bbwpohh : Math.round( 100 * ( plr.stack - plr.stats.boughtIn ) / ( curGame.hand.bbVal * plr.stats.hands ) ),
-                    hands : plr.stats.hands
+                    hands : plr.stats.hands,
+                    saved : plr.stats.savedHands
                 };
         }
     
@@ -115,7 +114,7 @@ io.on('connection', (socket) => {
             }
         }
 
-        console.log( 'action: ' + JSON.stringify( msg ));
+        // console.log( 'action: ' + JSON.stringify( msg ));
         socket.emit( 'ACTION_UPDATE', JSON.stringify( msg ));
     });
 
