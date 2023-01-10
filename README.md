@@ -13,7 +13,7 @@ module.exports = [ email, pass ];
 ToDo:
 should be fixed - stupid bug that breaks tournaments: CONNECT_LOGIN_INFO is within the lsit, not top level
 should be fixed -how do rebuys work ( PLAY_BUYIN_INFO? probabaly not)
--loses connection on rebuy
+-loses connection on rebuy - new ws opened, maybe check that
 -parse/display board cards
 
 tournament
