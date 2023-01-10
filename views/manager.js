@@ -79,6 +79,7 @@ socket.on( 'TABLE_UPDATE', ( msg ) => {
         document.querySelector( `#s${player} .preflop` ).textContent = '';
         document.querySelector( `#s${player} .flop` ).textContent = '';
         document.querySelector( `#s${player} .turn` ).textContent = '';
+        document.querySelector( `#b${player} .showhands` ).textContent = ( stats.saved != null ? stats.saved : '0' ) + ' saved hands';
     })
 });
 
