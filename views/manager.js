@@ -97,7 +97,7 @@ socket.on( 'ACTION_UPDATE', ( msg ) => {
         })
         console.log(`seat: ${seat}, street: ${street}`)
         console.log(str)
-        document.querySelector( `#s${seat} .${street}` ).textContent = ` ${street}: ${str}`;
+        document.querySelector( `#s${seat} .${street}` ).textContent = ` ${street}: ${str} `;
     }
     
 });
