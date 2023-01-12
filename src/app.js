@@ -147,12 +147,13 @@ async function initGame()
                 return;
 
             var frameData = JSON.parse( response.payloadData.split('|', 2)[1] ).data;
-            if ( Array.isArray(frameData) )
-                var frameType = frameData[0].pid;
-            else
+            if ( Array.isArray(frameData) ){
+                var frameType = "TOURNAMENT_INIT";
+            }
+            else{
                 var frameType = frameData.pid;
-
-
+            }
+                
 
             if (frameType === "CONNECT_LOGIN_INFO")    
                 curGame = new Game( );

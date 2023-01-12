@@ -127,12 +127,13 @@ export function parseFrame(curGame, frameType, frameData) {
 
     switch (frameType){
         
-        default:
-            break;
-
-        case undefined:
+        case "TOURNAMENT_INIT":
+            console.log("herehe")
             for ( const entry of frameData ){
-                
+
+                if (entry.pid==null)
+                    break;
+                console.log("should be in tourney")
                 // for tournaments
                 switch (entry.pid){
                     
@@ -143,6 +144,7 @@ export function parseFrame(curGame, frameType, frameData) {
                         break;
                     
                     case "CO_TABLE_INFO":
+                        console.log("alskjdflaksjdf")
                         curGame.mySeat = entry.mySeat[0];
 
                         entry.seatState.forEach((element, index) => {
