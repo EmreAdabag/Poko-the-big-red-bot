@@ -194,11 +194,11 @@ export function parseFrame(curGame, frameType, frameData) {
         // blind turns
         case "CO_BLIND_INFO":
             // add timeline event
-            curGame.writeTurn( 
-                frameData.seat - 1,
-                actions[ frameData.btn ],
-                frameData.bet + frameData.baseStakes     // check basestakes on tournament play
-            );
+            // curGame.writeTurn( 
+            //     frameData.seat - 1,
+            //     actions[ frameData.btn ],
+            //     frameData.bet + frameData.baseStakes     // check basestakes on tournament play
+            // );
             
             // update player stack
             curGame.players[ frameData.seat - 1 ].stack = frameData.account;
