@@ -53,6 +53,9 @@ const handhtml = `
     </div>
 </div>`
 
+
+
+
 for ( let i = 0; i < 9; i++ ){
     document.querySelector( '#s' + i ).innerHTML = playerhtml;
 }
@@ -60,7 +63,7 @@ for ( let i = 0; i < 9; i++ ){
 const socket = io('http://localhost:3000');
 
 socket.on( 'TABLE_UPDATE', ( msg ) => {
-
+    return
     console.log(msg);
     let data = JSON.parse( msg );
 
@@ -84,6 +87,7 @@ socket.on( 'TABLE_UPDATE', ( msg ) => {
 });
 
 socket.on( 'ACTION_UPDATE', ( msg ) => {
+    return
     console.log(msg);
     let parsedmsg = JSON.parse( msg );
     let street = parsedmsg.street;
@@ -115,9 +119,6 @@ const testfn = () => {
     })
 }
 
-function parsecard(card){
-    return String(card)
-}
 
 function parsehand( pno, pcards, tl, idx ){
 
@@ -191,6 +192,13 @@ socket.on( 'RETURN_HANDS', ( msg ) => {
     overlayon();
 });
 
+var game;
+
+socket.on( 'RETURN_GAME', ( msg ) => {
+    console.log(msg)
+    game = JSON.parse(msg)
+})
+
 function overlayon(){
     document.getElementById("overlay").style.display = "block"
 }
@@ -209,3 +217,6 @@ const getHands = ( seat ) => {
     socket.emit( 'GET_HANDS', String( seat ) )
 }
 
+function getgame(){
+    socket.emit( 'GETGAME' )
+}

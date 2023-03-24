@@ -67,12 +67,12 @@ class Hand {
         // this.pot = pot;
         // this.rake = rake;
         this.timeline = [];
+        this.board = [];
     }
 
     resetHand(  ){
         // console.log(this.timeline);
         // might want to update bbVal, sbVal
-        this.bbval = 0;
         this.btn = -1;
         this.pot = [];
         this.rake = 0;
@@ -80,6 +80,7 @@ class Hand {
         this.phase = "X";
         this.flopchop = null;
         this.turnchop = null;
+        this.board = []
     }
 
     setPhase( phase ){
@@ -139,8 +140,8 @@ export function parseFrame(curGame, frameType, frameData) {
                     
                     case "CO_OPTION_INFO":
                         curGame.tournament = true;
-                        curGame.hand.bbVal = entry.bblind;
-                        curGame.hand.sbVal = entry.sblind;
+                        curGame.hand.bbval = entry.bblind;
+                        curGame.hand.sbval = entry.sblind;
                         break;
                     
                     case "CO_TABLE_INFO":
@@ -170,8 +171,8 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_OPTION_INFO":
-            curGame.hand.bbVal = frameData.bblind;
-            curGame.hand.sbVal = frameData.sblind;
+            curGame.hand.bbval = frameData.bblind;
+            curGame.hand.sbval = frameData.sblind;
             break;
 
         case "CO_TABLE_STATE":
@@ -302,6 +303,7 @@ export function parseFrame(curGame, frameType, frameData) {
                         break;    
                     case "R":
                     case "S":
+                        // no reraise
                         playStat.post.raisins++;
 
                         // catches a big blind that checks a limp preflop
@@ -347,22 +349,26 @@ export function parseFrame(curGame, frameType, frameData) {
         case "CO_CURRENT_PLAYER":
             if ( frameData["seat"] == curGame.mySeat + 1 ){
                 // signify our hand
+                console.log(createPrompt( curGame ))
             }
             break;    
         
         case "CO_BCARD3_INFO":
             emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length, 'preflop' );
-            curGame.writeTurn( 'board', 'flop', frameData.bcard );
+            curGame.writeTurn( 'dealer', 'flop', frameData.bcard );
+            curGame.hand.board = curGame.hand.board.concat(frameData.bcard)
             curGame.hand.flopchop = curGame.hand.timeline.length;
             break;
         
         case "CO_BCARD1_INFO":
-            curGame.writeTurn( 'board', 'card', frameData.card );
+            curGame.writeTurn( 'dealer', 'card', frameData.card );
             if ( curGame.hand.turnchop == null ){
                 curGame.hand.turnchop = curGame.hand.timeline.length;
+                curGame.hand.board = curGame.hand.board.concat(frameData.card)
                 emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length, 'flop' );
             }
             else{
+                curGame.hand.board = curGame.hand.board.concat(frameData.card)
                 emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length, 'turn' );
             }
             break;
@@ -476,6 +482,7 @@ export function parseFrame(curGame, frameType, frameData) {
 
 
 function saveHand( player, pno, pcards, timeline ){
+    return
     console.log('saving hand for player: ' + pno)               // PRINT
     console.log(`player: ${player}                              
     cards: ${pcards}
@@ -491,4 +498,37 @@ function saveHand( player, pno, pcards, timeline ){
         console.log(`issue saving hand:  ${e}`)
     }
 
+}
+
+
+function getActivePlayers(players) {
+    const activePlayers = [];
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
+      if (player !== null) {
+        activePlayers.push({ seat: i, stack: player.stack });
+      }
+    }
+    return JSON.stringify(activePlayers).replace(/},/g, "}\n\t\t\t");
+}
+
+const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
+const suits = ["C", "D", "H", "S"];
+
+function parsecard(card){
+    return ranks[card%13] + suits[Math.floor(card/13)]
+}
+
+
+function createPrompt( game ){
+    return `{
+        "Hand": ${game.players[game.mySeat].cards.map((element) => parsecard(element))},
+        "Stack": ${game.players[game.mySeat].stack},
+        "Button": ${game.hand.btn},
+        "Blinds": 5/2,
+        "Players": ${getActivePlayers(game.players)},
+        "Pot": ${game.hand.pot[0] === undefined ? 0 : game.hand.pot[0]},
+        "Board": ${game.hand.board.map((element) => parsecard(element))},
+        "Timeline": ${JSON.stringify(game.hand.timeline).replace(/},/g, "}\n\t\t\t").replace(/"F",.*0/g, "\"F\"").replace(/"CH",.*0/g, "\"CH\"").replace(/{"player":"dealer","action":"flop".*}/, "{Flop},").replace(/{"player":"dealer","action":"card".*}/, "{Turn},").replace(/{"player":"dealer","action":"card".*}/, "{River},").replace(/RR/g, "R").replace(/CS/g, "S")}
+    }`
 }

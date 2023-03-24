@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "start": "nodemon ./src/app.js"
+    "start": "nodemon ./src/app.js --no-watch"
   },
   "devDependencies": {
     "jest": "^29.0.2"
