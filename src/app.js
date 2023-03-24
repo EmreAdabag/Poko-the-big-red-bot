@@ -67,6 +67,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on( 'GETGAME', ( ) => {
+        socket.emit( 'RETURN_GAME', JSON.stringify( curGame) )
+    })
+
     emitter.on( 'TABLE_UPDATE', ( ) => {
         if (curGame.mySeat == null) return;
         

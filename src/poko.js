@@ -67,12 +67,12 @@ class Hand {
         // this.pot = pot;
         // this.rake = rake;
         this.timeline = [];
+        this.board = [];
     }
 
     resetHand(  ){
         // console.log(this.timeline);
         // might want to update bbVal, sbVal
-        this.bbval = 0;
         this.btn = -1;
         this.pot = [];
         this.rake = 0;
@@ -80,6 +80,7 @@ class Hand {
         this.phase = "X";
         this.flopchop = null;
         this.turnchop = null;
+        this.board = []
     }
 
     setPhase( phase ){
@@ -138,8 +139,8 @@ export function parseFrame(curGame, frameType, frameData) {
                     
                     case "CO_OPTION_INFO":
                         curGame.tournament = true;
-                        curGame.hand.bbVal = entry.bblind;
-                        curGame.hand.sbVal = entry.sblind;
+                        curGame.hand.bbval = entry.bblind;
+                        curGame.hand.sbval = entry.sblind;
                         break;
                     
                     case "CO_TABLE_INFO":
@@ -168,8 +169,8 @@ export function parseFrame(curGame, frameType, frameData) {
             break;
 
         case "CO_OPTION_INFO":
-            curGame.hand.bbVal = frameData.bblind;
-            curGame.hand.sbVal = frameData.sblind;
+            curGame.hand.bbval = frameData.bblind;
+            curGame.hand.sbval = frameData.sblind;
             break;
 
         case "CO_TABLE_STATE":
@@ -300,6 +301,7 @@ export function parseFrame(curGame, frameType, frameData) {
                         break;    
                     case "R":
                     case "S":
+                        // no reraise
                         playStat.post.raisins++;
 
                         // catches a big blind that checks a limp preflop
@@ -345,22 +347,26 @@ export function parseFrame(curGame, frameType, frameData) {
         case "CO_CURRENT_PLAYER":
             if ( frameData["seat"] == curGame.mySeat + 1 ){
                 // signify our hand
+                console.log(createPrompt( curGame ))
             }
             break;    
         
         case "CO_BCARD3_INFO":
             emitter.emit( 'ACTION_UPDATE', 0, curGame.hand.timeline.length, 'preflop' );
-            curGame.writeTurn( 'board', 'flop', frameData.bcard );
+            curGame.writeTurn( 'dealer', 'flop', frameData.bcard );
+            curGame.hand.board = curGame.hand.board.concat(frameData.bcard)
             curGame.hand.flopchop = curGame.hand.timeline.length;
             break;
         
         case "CO_BCARD1_INFO":
-            curGame.writeTurn( 'board', 'card', frameData.card );
+            curGame.writeTurn( 'dealer', 'card', frameData.card );
             if ( curGame.hand.turnchop == null ){
                 curGame.hand.turnchop = curGame.hand.timeline.length;
+                curGame.hand.board = curGame.hand.board.concat(frameData.card)
                 emitter.emit( 'ACTION_UPDATE', curGame.hand.flopchop, curGame.hand.timeline.length, 'flop' );
             }
             else{
+                curGame.hand.board = curGame.hand.board.concat(frameData.card)
                 emitter.emit( 'ACTION_UPDATE', curGame.hand.turnchop, curGame.hand.timeline.length, 'turn' );
             }
             break;
@@ -490,3 +496,28 @@ function saveHand( player, pno, pcards, timeline ){
     }
 
 }
+
+
+const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
+const suits = ["C", "D", "H", "S"];
+
+function parsecard(card){
+    return ranks[card%13] + suits[Math.floor(card/13)]
+}
+
+
+function createPrompt( game ){
+    return `{
+        "Hand": ${game.players[game.mySeat].cards.map((element) => parsecard(element))},
+        "Stack": ${game.players[game.mySeat].stack},
+        "Position": ${game.mySeat},
+        "Blinds": "\$${game.hand.bb}/\$${game.hand.sb}",
+        "Players": ${game.players.filter((element) => element !== null && element.sittingout != true).length},
+        "Pot": ${game.hand.pot[0]},
+        "Board": ${game.hand.board.map((element) => parsecard(element))},
+        "Timeline": ${JSON.stringify(game.hand.timeline).replace(/},/g, "}\n\t\t\t").replace(/{"player":"dealer","action":"flop".*}/, "Flop")}
+    }`
+}
+
+
+blinds broke, replace turn and riber
