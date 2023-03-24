@@ -194,11 +194,11 @@ export function parseFrame(curGame, frameType, frameData) {
         // blind turns
         case "CO_BLIND_INFO":
             // add timeline event
-            // curGame.writeTurn( 
-            //     frameData.seat - 1,
-            //     actions[ frameData.btn ],
-            //     frameData.bet + frameData.baseStakes     // check basestakes on tournament play
-            // );
+            curGame.writeTurn( 
+                frameData.seat - 1,
+                actions[ frameData.btn ],
+                frameData.bet + frameData.baseStakes     // check basestakes on tournament play
+            );
             
             // update player stack
             curGame.players[ frameData.seat - 1 ].stack = frameData.account;
@@ -480,6 +480,7 @@ export function parseFrame(curGame, frameType, frameData) {
 
 
 function saveHand( player, pno, pcards, timeline ){
+    return
     console.log('saving hand for player: ' + pno)               // PRINT
     console.log(`player: ${player}                              
     cards: ${pcards}
@@ -498,6 +499,17 @@ function saveHand( player, pno, pcards, timeline ){
 }
 
 
+function getActivePlayers(players) {
+    const activePlayers = [];
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
+      if (player !== null) {
+        activePlayers.push({ seat: i, stack: player.stack });
+      }
+    }
+    return JSON.stringify(activePlayers).replace(/},/g, "}\n\t\t\t");
+}
+
 const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"];
 const suits = ["C", "D", "H", "S"];
 
@@ -510,14 +522,11 @@ function createPrompt( game ){
     return `{
         "Hand": ${game.players[game.mySeat].cards.map((element) => parsecard(element))},
         "Stack": ${game.players[game.mySeat].stack},
-        "Position": ${game.mySeat},
-        "Blinds": "\$${game.hand.bb}/\$${game.hand.sb}",
-        "Players": ${game.players.filter((element) => element !== null && element.sittingout != true).length},
-        "Pot": ${game.hand.pot[0]},
+        "Button": ${game.hand.btn},
+        "Blinds": 5/2,
+        "Players": ${getActivePlayers(game.players)},
+        "Pot": ${game.hand.pot[0] === undefined ? 0 : game.hand.pot[0]},
         "Board": ${game.hand.board.map((element) => parsecard(element))},
-        "Timeline": ${JSON.stringify(game.hand.timeline).replace(/},/g, "}\n\t\t\t").replace(/{"player":"dealer","action":"flop".*}/, "Flop")}
+        "Timeline": ${JSON.stringify(game.hand.timeline).replace(/},/g, "}\n\t\t\t").replace(/"F",.*0/g, "\"F\"").replace(/"CH",.*0/g, "\"CH\"").replace(/{"player":"dealer","action":"flop".*}/, "{Flop},").replace(/{"player":"dealer","action":"card".*}/, "{Turn},").replace(/{"player":"dealer","action":"card".*}/, "{River},").replace(/RR/g, "R").replace(/CS/g, "S")}
     }`
 }
-
-
-blinds broke, replace turn and riber

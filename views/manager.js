@@ -192,11 +192,11 @@ socket.on( 'RETURN_HANDS', ( msg ) => {
     overlayon();
 });
 
-var gam;
+var game;
 
 socket.on( 'RETURN_GAME', ( msg ) => {
     console.log(msg)
-    gam = JSON.parse(msg)
+    game = JSON.parse(msg)
 })
 
 function overlayon(){
